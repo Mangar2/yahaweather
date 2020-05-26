@@ -14,11 +14,16 @@
 #include "mqttserver.h"
 
 ESP8266WebServer* MQTTServer::_httpServer;
+callback MQTTServer::_onPublishFunc = 0;
     
 void MQTTServer::onPublish() {
     String postBody = _httpServer->arg("plain");
     PRINTLN_IF_DEBUG("Received POST publish command body:");
     PRINTLN_IF_DEBUG(postBody);
+    JSON json(postBody);
+    if (_onPublishFunc != 0) {
+        _onPublishFunc(json);
+    }
 
     String id = _httpServer->header("id");
     PRINTLN_VARIABLE_IF_DEBUG(id)
@@ -30,6 +35,10 @@ void MQTTServer::onPublish() {
 
 void MQTTServer::handleClient() {
     _httpServer->handleClient();
+}
+
+void MQTTServer::registerOnPublishFunction(callback func) {
+    _onPublishFunc = func;
 }
 
 void MQTTServer::handleNotFound() {
@@ -48,7 +57,8 @@ void MQTTServer::restServerRouting() {
     _httpServer->onNotFound(handleNotFound);
 }
 
-void MQTTServer::begin() {
+void MQTTServer::begin(uint32_t port) {
+    _httpServer = new ESP8266WebServer(port);
     const char* headers[] = {"id"};
     _httpServer->collectHeaders(headers, sizeof(headers)/ sizeof(headers[0]));
     _httpServer->begin();

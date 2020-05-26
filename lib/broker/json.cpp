@@ -35,7 +35,7 @@ String jsonObjectProperty(String name, String object) {
   * @param json string tokenizer
   * @returns Array content
   */
-String JSON::getArrayContent(JSONTokenizer& json) {
+String JSON::getArrayContent(JSONTokenizer& json) const {
 	String object = getNextObject(json);
 	String result = "";
 	String tk;
@@ -64,7 +64,7 @@ String JSON::getArrayContent(JSONTokenizer& json) {
 * @param json string tokenizer
 * @returns Array content
 */
-String JSON::getObjectContent(JSONTokenizer& json) {
+String JSON::getObjectContent(JSONTokenizer& json) const {
 	String propertyName = json.getNextToken();
 	String result = propertyName;
 	while (propertyName != "}" && propertyName != "") {
@@ -91,7 +91,7 @@ String JSON::getObjectContent(JSONTokenizer& json) {
  * Gets the next object of a json
  * @param json string tokenizer
  */
-String JSON::getNextObject(JSONTokenizer& json) {
+String JSON::getNextObject(JSONTokenizer& json) const {
 	String tk = json.getNextToken();
 	String result = tk;
 	if (tk == "{") {
@@ -113,7 +113,7 @@ String JSON::getNextObject(JSONTokenizer& json) {
 * @param property property name
 * @returns true, if found
 */
-bool JSON::searchPropertyInObject(JSONTokenizer& json, const String& property) {
+bool JSON::searchPropertyInObject(JSONTokenizer& json, const String& property) const {
 	String tk;
 	bool result = false;
 	json.skipExpectedToken("{");
@@ -142,7 +142,7 @@ bool JSON::searchPropertyInObject(JSONTokenizer& json, const String& property) {
 * @param property property name
 * @returns true, if found
 */
-bool JSON::searchArrayElement(JSONTokenizer& json, uint16_t index) {
+bool JSON::searchArrayElement(JSONTokenizer& json, uint16_t index) const {
 	json.skipExpectedToken("[");
 	String tk;
 	while (index > 0 && tk != "]") {
@@ -164,7 +164,7 @@ bool JSON::searchArrayElement(JSONTokenizer& json, uint16_t index) {
 * @param json string in JSON format
 * @param path string in json path format
 */
-String JSON::getElementRec(JSONTokenizer& json, JSONTokenizer& path) {
+String JSON::getElementRec(JSONTokenizer& json, JSONTokenizer& path) const {
 	String tk = path.getNextToken();
 	String result = "";
 	if (tk == ".") {
@@ -193,7 +193,7 @@ String JSON::getElementRec(JSONTokenizer& json, JSONTokenizer& path) {
 * Gets an element from the JSON fromatted string based on a json path
 * @param jsonPath path of the for a.b[x] (as in javaScript)
 */
-String JSON::getElement(String jsonPath) {
+String JSON::getElement(String jsonPath) const {
 	JSONTokenizer json(_jsonString);
 	JSONTokenizer path(jsonPath);
 	String result = getElementRec(json, path);

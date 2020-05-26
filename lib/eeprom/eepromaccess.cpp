@@ -13,7 +13,7 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 #include "debug.h"
-#include "eeprommanage.h"
+#include "eepromaccess.h"
 
 /**
  * Provided function to store and read a configuration from EEPROM
@@ -24,9 +24,6 @@ namespace EEPROMAccess {
       EEPROM.begin(EEPROM_SIZE);
     }
 
-    /**
-     * dumps the EEPROM entry for debugging
-     */
     void dump() {
     IF_DEBUG(
         uint8_t data;
@@ -50,9 +47,6 @@ namespace EEPROMAccess {
     )
     }
 
-    /**
-     * Reads a byte array from EEPROM
-     */
     void read(uint16_t baseAddress, uint8_t* data, uint16_t size) {
         if (baseAddress + size < EEPROM_SIZE) {
             for (uint16_t i = 0; i < size; i++)
@@ -62,9 +56,6 @@ namespace EEPROMAccess {
         }
     }
 
-    /**
-     * Write a byte array to EEPROM
-     */
     void write(uint16_t baseAddress, const uint8_t* data, uint16_t size) {
         if (baseAddress + size < EEPROM_SIZE) {
             for (uint16_t i = 0; i < size; i++)
@@ -72,6 +63,11 @@ namespace EEPROMAccess {
                 EEPROM.write(i + baseAddress, data[i]);
             }
         }
+    }
+
+
+    void commit() {
+        EEPROM.commit();
     }
 
 }

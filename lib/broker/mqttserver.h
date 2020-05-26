@@ -12,17 +12,31 @@
 #pragma once
 #include <Arduino.h>
 #include <ESP8266WebServer.h>
+#include "json.h"
+
+typedef void (*callback)(const JSON&);
 
 class MQTTServer {
 public:
-    MQTTServer(uint32_t port) {
-        _httpServer = new ESP8266WebServer(port);
-    }
 
     /**
      * Starts the server
      */
-    static void begin();
+    static void begin(uint32_t port);
+    
+    /**
+     * Enables client processing
+     */
+    static void handleClient();
+
+    /**
+     * Registeres a function called in an on publish request
+     */
+    static void registerOnPublishFunction(callback func);
+
+private:
+    MQTTServer() {
+    }
 
     /**
      * Handles a http POST publish command, replies with PUBACK and returns the id in the header to 
@@ -31,16 +45,9 @@ public:
     static void onPublish();
 
     /**
-     * Enables client processing
-     */
-    static void handleClient();
-
-    /**
      * routes the rest messages to a matching function
      */
-    void restServerRouting();
-
-private:
+    static void restServerRouting();
 
     /**
      * sends back a not found error
@@ -48,4 +55,5 @@ private:
     static void handleNotFound();
 
     static ESP8266WebServer* _httpServer;
+    static callback _onPublishFunc;
 };

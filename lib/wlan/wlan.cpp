@@ -48,6 +48,8 @@ bool WLAN::connect() {
     uint8_t tries = 0;
     bool isConnectedToWLAN = false;
     WiFi.forceSleepWake();
+    PRINTLN_VARIABLE_IF_DEBUG(_ssid)
+    PRINTLN_VARIABLE_IF_DEBUG(_password)
     WiFi.begin(_ssid, _password);
     while (tries < MAX_TRIES && WiFi.status() != WL_CONNECTED) {
         delay(200);

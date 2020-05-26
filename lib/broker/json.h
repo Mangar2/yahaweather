@@ -36,7 +36,7 @@ public:
 	* Gets an element from the JSON fromatted string based on a json path
 	* @param jsonPath path of the for a.b[x] (as in javaScript)
 	*/
-	String getElement(String jsonPath);
+	String getElement(String jsonPath) const;
 
 private:
 	String _jsonString;
@@ -46,20 +46,20 @@ private:
 	* @param json string tokenizer
 	* @returns Array content
 	*/
-	String getArrayContent(JSONTokenizer& json);
+	String getArrayContent(JSONTokenizer& json) const;
 
 	/**
 	* Gets the content of an object
 	* @param json string tokenizer
 	* @returns Object content
 	*/
-	String getObjectContent(JSONTokenizer& json);
+	String getObjectContent(JSONTokenizer& json) const;
 
 	/**
 	* Gets the next object of a json
 	* @param json string tokenizer
 	*/
-	String getNextObject(JSONTokenizer& json);
+	String getNextObject(JSONTokenizer& json) const;
 
 
 	/**
@@ -68,7 +68,7 @@ private:
 	* @param property property name
 	* @returns true, if found
 	*/
-	bool searchPropertyInObject(JSONTokenizer& json, const String& property);
+	bool searchPropertyInObject(JSONTokenizer& json, const String& property) const;
 
 	/**
 	* Searches the start position of an array element
@@ -76,13 +76,13 @@ private:
 	* @param index index of the array element
 	* @returns true, if found
 	*/
-	bool searchArrayElement(JSONTokenizer& json, uint16_t index);
+	bool searchArrayElement(JSONTokenizer& json, uint16_t index) const;
 
 	/**
 	* Recursively extracts a substring from a json string by following the path
 	* @param json string in JSON format
 	* @param path string in json path format
 	*/
-	String getElementRec(JSONTokenizer& json, JSONTokenizer& path);
+	String getElementRec(JSONTokenizer& json, JSONTokenizer& path) const;
 
 };

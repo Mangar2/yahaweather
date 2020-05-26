@@ -44,4 +44,9 @@ namespace EEPROMAccess {
      */
     void write(uint16_t baseAddress, const uint8_t* data, uint16_t size);
 
+    /**
+     * Commits all write accesses
+     */
+    void commit();
+
 }
