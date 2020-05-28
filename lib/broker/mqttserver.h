@@ -39,20 +39,20 @@ private:
     }
 
     /**
-     * Handles a http POST publish command, replies with PUBACK and returns the id in the header to 
+     * Handles a http PUT publish command, replies with PUBACK and returns the id in the header to 
      * identify the right mesage
      */
     static void onPublish();
 
     /**
+     * Handles a http POST command to receive form data.
+     */
+    static void onPost();
+
+    /**
      * routes the rest messages to a matching function
      */
     static void restServerRouting();
-
-    /**
-     * sends back a not found error
-     */
-    static void handleNotFound();
 
     static ESP8266WebServer* _httpServer;
     static callback _onPublishFunc;
