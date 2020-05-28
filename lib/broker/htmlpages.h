@@ -12,14 +12,14 @@
 #include <Arduino.h>
 #include "htmlstructure.h"
 #include "htmlstyle.h"
-#include "htmlforms.h"
+#include "htmlbrokerform.h"
+#include "htmlwlanform.h"
+#include "htmlclientform.h"
+#include "htmlweatherform.h"
 #include "htmltopnav.h"
 
 String htmlPage = 
     String(htmlStart) + 
     String(htmlStyle) + 
     "</head><body>" +
-    htmlTopNav +
-    htmlMainForm +
-    "</body></html>";
-
+    htmlTopNav;

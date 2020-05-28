@@ -9,22 +9,9 @@
  * Provides a web page with a configuration form
  */
 
-const char* htmlMainForm = R"htmlform(
+const char* htmlClientForm = R"htmlform(
 <div class="container">
-  <form action="/" method="POST">
-    <p>
-        <label for="ssid">Wlan name</label>
-        <input type="text" id="ssid" name="wlanssid" placeholder="ssid...">
-
-        <label for="passwd">Wlan Password</label>
-        <input type="password" id="passwd" name="wlanpassword" placeholder="password...">
-    </p>
-    <label for="brokerhost">Broker host</label>
-    <input type="text" id="brokerhost" name="brokerhost" placeholder="Broker host...">
-
-    <label for="brokerport">Broker port</label>
-    <input type="number" id="brokerport" name="brokerport" value="8183">
-
+  <form action="/client" method="POST">
     <label for="clientname">Client name</label>
     <input type="text" id="clientname" name="clientname" value="ESP8266/weather/station">
 
@@ -33,5 +20,5 @@ const char* htmlMainForm = R"htmlform(
 
     <input type="submit" value="Submit">
   </form>
-</div>
+</div></body></html>
 )htmlform";

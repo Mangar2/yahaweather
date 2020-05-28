@@ -45,9 +45,20 @@ private:
     static void onPublish();
 
     /**
-     * Handles a http POST command to receive form data.
+     * Handles a http POST wlan command to receive form data.
      */
-    static void onPost();
+    static void onWlan();
+
+    /**
+     * Handles a http POST broker command to receive form data.
+     */
+    static void onBroker();
+
+    /**
+     * Handles a http POST client command to receive form data.
+     */
+    static void onClient();
+
 
     /**
      * routes the rest messages to a matching function

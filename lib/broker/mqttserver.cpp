@@ -12,7 +12,7 @@
 #define __DEBUG
 #include "debug.h"
 #include "mqttserver.h"
-#include "htmlpage.h"
+#include "htmlpages.h"
 
 ESP8266WebServer* MQTTServer::_httpServer;
 callback MQTTServer::_onPublishFunc = 0;
@@ -34,18 +34,36 @@ void MQTTServer::onPublish() {
     delay(10);
 }
 
-void MQTTServer::onPost() {
-    String postBody = _httpServer->arg("basetopic");
-    PRINTLN_IF_DEBUG("Received POST publish command body:");
-    PRINTLN_IF_DEBUG(postBody);
-    JSON json(postBody);
-    if (_onPublishFunc != 0) {
-        _onPublishFunc(json);
-    }
+void MQTTServer::onWlan() {
+    String ssid = _httpServer->arg("ssid");
+    String password = _httpServer->arg("password");
+    PRINTLN_IF_DEBUG(ssid);
+    PRINTLN_IF_DEBUG(password);
 
-    _httpServer->send(200, "text/html", "Values stored");
+    _httpServer->send(200, "text/html", htmlPage + "Values stored</body></html>");
     delay(10);
 }
+
+void MQTTServer::onBroker() {
+    String host = _httpServer->arg("brokerhost");
+    String port = _httpServer->arg("brokerport");
+    PRINTLN_IF_DEBUG(host);
+    PRINTLN_IF_DEBUG(port);
+
+    _httpServer->send(200, "text/html", htmlPage + "Values stored</body></html>");
+    delay(10);
+}
+
+void MQTTServer::onClient() {
+    String clientName = _httpServer->arg("clientname");
+    String baseTopic = _httpServer->arg("basetopic");
+    PRINTLN_IF_DEBUG(clientName);
+    PRINTLN_IF_DEBUG(baseTopic);
+
+    _httpServer->send(200, "text/html", htmlPage + "Values stored</body></html>");
+    delay(10);
+}
+
 
 void MQTTServer::handleClient() {
     _httpServer->handleClient();
@@ -58,12 +76,21 @@ void MQTTServer::registerOnPublishFunction(callback func) {
 void MQTTServer::restServerRouting() {
     PRINTLN_IF_DEBUG("REST SERVER ROUTING")
     _httpServer->on("/", HTTP_GET, []() {
-        PRINTLN_IF_DEBUG("HTTP GET")
-        _httpServer->sendHeader("Accept", "application/json");
-        _httpServer->send(200, "text/html", htmlPage);
+        _httpServer->send(200, "text/html", htmlPage + htmlWeatherForm);
+    });
+    _httpServer->on("/wlan", HTTP_GET, []() {
+        _httpServer->send(200, "text/html", htmlPage + htmlWLANForm);
+    });
+    _httpServer->on("/broker", HTTP_GET, []() {
+        _httpServer->send(200, "text/html", htmlPage + htmlBrokerForm);
+    });
+    _httpServer->on("/client", HTTP_GET, []() {
+        _httpServer->send(200, "text/html", htmlPage + htmlClientForm);
     });
     _httpServer->on("/publish", HTTP_PUT, onPublish);
-    _httpServer->on("/", HTTP_POST, onPost);
+    _httpServer->on("/wlan", HTTP_POST, onWlan);
+    _httpServer->on("/broker", HTTP_POST, onBroker);
+    _httpServer->on("/client", HTTP_POST, onClient);
     _httpServer->onNotFound([]() {
         String message = "Resource not found\n URI: " + _httpServer->uri() + "\n";
         PRINTLN_VARIABLE_IF_DEBUG(message)
