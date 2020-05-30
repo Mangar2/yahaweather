@@ -6,7 +6,7 @@
  * @author Volker Böhm
  * @copyright Copyright (c) 2020 Volker Böhm
  * @brief
- * Provides a class to connect to WLAN
+ * Provides a string class using a fixed amount of memory used for flash based configuration
  */
 #pragma once
 #include <Arduino.h>
@@ -43,11 +43,47 @@ public:
     operator String() const {
         return String(getBuffer());
     }
-    // Zugriff auf den Puffer
+    // Access to the buffer
     const char* getBuffer() const 
     { 
         return data; 
     }
+    
+	// Compares two strings
+	friend bool operator==(const StaticString<size>& aStr1, const StaticString<size>& aStr2)
+	{
+		return strncmp(aStr1.getBuffer(), aStr2.getBuffer(), size) == 0;
+	}
+
+	// Compares two strings
+	friend bool operator==(const StaticString<size>& aStr1, const char* apChar)
+	{
+		return strncmp(aStr1.getBuffer(), apChar, size) == 0;
+	}
+
+	// Compares two strings
+	friend bool operator==(const char* apChar, const StaticString<size>& aStr1)
+	{
+		return strncmp(apChar, aStr1.getBuffer(), size) == 0;
+	}
+
+	// Compares two strings, not equal
+	friend bool operator!=(const StaticString<size>& aStr1, const StaticString<size>& aStr2)
+	{
+		return strncmp(aStr1.getBuffer(), aStr2.getBuffer(), size) != 0;
+	}
+
+    // Compares two strings, not equal
+	friend bool operator!=(const StaticString<size>& aStr1, const char* apChar)
+	{
+		return strncmp(aStr1.getBuffer(), apChar, size) != 0;
+	}
+
+	// Compares two strings, not equal
+	friend bool operator!=(const char* apChar, const StaticString<size>& aStr1)
+	{
+		return strncmp(apChar, aStr1.getBuffer(), size) != 0;
+	}
 private:
     char data[size];
 };

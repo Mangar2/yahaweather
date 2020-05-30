@@ -12,9 +12,11 @@
 #pragma once
 #include <Arduino.h>
 #include <ESP8266WebServer.h>
+#include <map>
 #include "json.h"
 
 typedef void (*callback)(const JSON&);
+typedef void (*setCallback)(const String&, const String&);
 
 class MQTTServer {
 public:
@@ -33,6 +35,26 @@ public:
      * Registeres a function called in an on publish request
      */
     static void registerOnPublishFunction(callback func);
+
+    /**
+     * Registeres a function to set the WLAN
+     */
+    static void registerSetWLAN(setCallback setWlanFunc) { _onWLANFunc = setWlanFunc; }
+
+    /**
+     * Registeres a function to set broker connection information
+     */
+    static void registerSetBroker(setCallback setBrokerFunc) { _onBrokerFunc = setBrokerFunc; }
+
+    /**
+     * Registeres a function to set client configuration
+     */
+    static void registerSetClient(setCallback setClientFunc) { _onClientFunc = setClientFunc; }
+
+    /**
+     * Sets data for forms
+     */
+    static void setData(const String& key, const String& value) { data[key] = value; }
 
 private:
     MQTTServer() {
@@ -65,6 +87,15 @@ private:
      */
     static void restServerRouting();
 
+    /**
+     * Replaces values in a form
+     */
+    static String replaceFormValues(const String& form); 
+
     static ESP8266WebServer* _httpServer;
     static callback _onPublishFunc;
+    static setCallback _onWLANFunc;
+    static setCallback _onBrokerFunc;
+    static setCallback _onClientFunc;
+    static std::map<String, String> data;
 };

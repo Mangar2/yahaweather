@@ -51,7 +51,7 @@ void BrokerProxy::connect() {
         jsonStringProperty("clientId", _config.clientName) + "," + 
         jsonStringProperty("clean", "false") + "," + 
         jsonStringProperty("host", _IPAddress) + "," + 
-        jsonStringProperty("port", _config.serverPort) + "}";
+        jsonStringProperty("port", _port) + "}";
     String urlWithoutHost = "/connect";
     sendToServer(urlWithoutHost, body);
 }

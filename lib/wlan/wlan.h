@@ -14,6 +14,10 @@
 #include "staticstring.h"
 
 struct WLANConfiguration {
+    String getUUID() { return "11896e60-6f3a-46ef-b718-839df2380de5"; }
+    void initUUDI() { uuid = getUUID(); }
+    bool isInitialized() { return uuid == getUUID(); }
+    StaticString<38> uuid;
     StaticString<32> ssid;
     StaticString<32> password;
 };

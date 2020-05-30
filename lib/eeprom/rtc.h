@@ -19,22 +19,6 @@ extern "C" {
 
 namespace RTC {
 
-    template <class T>
-    class RTCMem {
-    public:
-    static T read(uint16_t addr) {
-        T result;
-        system_rtc_mem_read(RTC_USER_DATA_ADDR + addr, &result, sizeof(result));
-        return result;  
-    }
-
-    static void write(uint16_t addr, T data) {
-        system_rtc_mem_write(RTC_USER_DATA_ADDR + addr, &data, sizeof(data));
-    }
-    
-    static const uint16_t RTC_USER_DATA_ADDR = 65;
-    };
-
     /**
      * Gets the reason for a wakuep event
      */
@@ -43,29 +27,33 @@ namespace RTC {
     /**
      * Returns true, if the module waked up from deep sleep
      */
-    bool isDeepSleepAwake() {
-        return getResetReason() == REASON_DEEP_SLEEP_AWAKE;
-    }
+    bool isDeepSleepAwake();
 
     /**
      * Returns true, if the module waked up from power up
      */
-    bool isPowerUp() {
-        return getResetReason() == REASON_DEFAULT_RST;
-    }
+    bool isPowerUpAwake();
 
     /**
      * Gets the time stored in the rtc module
      */
-    uint32_t getRtcTime() {
-        return system_get_rtc_time();
-    }
+    uint32_t getRtcTime();
 
     /**
      * Initializes the RTC memory entries and places a wakeup counter at the beginning
      * @param startWakeupCounter start value for the wakeup counter
      */
     void initWakeupCounter(uint16_t startWakeupCounter = 0);
+
+    /**
+     * Gets the amount of continuous resets
+     */
+    uint16_t getFastResetAmount();
+
+    /**
+     * Sets the amount of continuous resets
+     */
+    void setFastResetAmount(uint16_t fastResetAmount);
 
     /**
      * Gets the amount of wakeups encountered
@@ -82,4 +70,3 @@ namespace RTC {
      */
     void incWakeupAmount(); 
 }
-

@@ -19,7 +19,6 @@ struct BrokerConfiguration {
     StaticString<8> brokerPort;
     StaticString<24> clientName;
     StaticString<64> baseTopic;
-    StaticString<8> serverPort;
 };
 
 class BrokerProxy {
@@ -29,8 +28,9 @@ public:
     /**
      * Sets the configuration
      */
-    void setConfiguration(const BrokerConfiguration& config, String myIPAddress) {
+    void setConfiguration(const BrokerConfiguration& config, String myIPAddress, String myPort) {
         _IPAddress = myIPAddress;
+        _port = myPort;
         _config = config;
     }
 
@@ -61,5 +61,6 @@ private:
 
     BrokerConfiguration _config;
     String _IPAddress;
+    String _port;
 
 };

@@ -21,5 +21,4 @@
 String htmlPage = 
     String(htmlStart) + 
     String(htmlStyle) + 
-    "</head><body>" +
-    htmlTopNav;
+    "</head><body>";

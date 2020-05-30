@@ -13,10 +13,10 @@ const char* htmlClientForm = R"htmlform(
 <div class="container">
   <form action="/client" method="POST">
     <label for="clientname">Client name</label>
-    <input type="text" id="clientname" name="clientname" value="ESP8266/weather/station">
+    <input type="text" id="clientname" name="clientName" [value]="clientName">
 
     <label for="basetopic">Base topic</label>
-    <input type="text" id="basetopic" name="basetopic" value="outdoor/garden/esp8266/weather">
+    <input type="text" id="basetopic" name="baseTopic" [value]="baseTopic">
 
     <input type="submit" value="Submit">
   </form>

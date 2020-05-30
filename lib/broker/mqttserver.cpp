@@ -16,16 +16,24 @@
 
 ESP8266WebServer* MQTTServer::_httpServer;
 callback MQTTServer::_onPublishFunc = 0;
+setCallback MQTTServer::_onWLANFunc = 0;
+setCallback MQTTServer::_onBrokerFunc = 0;
+setCallback MQTTServer::_onClientFunc = 0;
+std::map<String, String> MQTTServer::data;
     
 void MQTTServer::onPublish() {
     String postBody = _httpServer->arg("plain");
     PRINTLN_IF_DEBUG("Received PUT publish command body:");
     PRINTLN_IF_DEBUG(postBody);
     JSON json(postBody);
-    if (_onPublishFunc != 0) {
-        _onPublishFunc(json);
+    const String topic = json.getElement("topic");
+    if (topic == "$SYS/outdoor/ESP8266/weather/broker/set") {
+        _onBrokerFunc(json.getElement("value.brokerHost"), json.getElement("value.brokerPort"));
+        _onClientFunc(json.getElement("value.clientName"), json.getElement("value.baseTopic"));
     }
-
+    if (topic == "$SYS/outdoor/ESP8266/weather/wlan/set") {
+        _onWLANFunc(json.getElement("value.ssid"), json.getElement("value.password"));
+    }
     String id = _httpServer->header("id");
     PRINTLN_VARIABLE_IF_DEBUG(id)
 
@@ -35,35 +43,42 @@ void MQTTServer::onPublish() {
 }
 
 void MQTTServer::onWlan() {
-    String ssid = _httpServer->arg("ssid");
-    String password = _httpServer->arg("password");
-    PRINTLN_IF_DEBUG(ssid);
-    PRINTLN_IF_DEBUG(password);
-
+    data["ssid"] = _httpServer->arg("ssid");
+    data["password"] = _httpServer->arg("password");
+    _onWLANFunc(data["ssid"], data["password"]);
     _httpServer->send(200, "text/html", htmlPage + "Values stored</body></html>");
-    delay(10);
 }
 
 void MQTTServer::onBroker() {
-    String host = _httpServer->arg("brokerhost");
-    String port = _httpServer->arg("brokerport");
-    PRINTLN_IF_DEBUG(host);
-    PRINTLN_IF_DEBUG(port);
-
+    data["brokerHost"] = _httpServer->arg("brokerHost");
+    data["brokerPort"] = _httpServer->arg("brokerPort");
+    _onBrokerFunc(data["brokerHost"], data["brokerPort"]);
     _httpServer->send(200, "text/html", htmlPage + "Values stored</body></html>");
-    delay(10);
 }
 
 void MQTTServer::onClient() {
-    String clientName = _httpServer->arg("clientname");
-    String baseTopic = _httpServer->arg("basetopic");
-    PRINTLN_IF_DEBUG(clientName);
-    PRINTLN_IF_DEBUG(baseTopic);
-
+    data["clientName"] = _httpServer->arg("clientName");
+    data["baseTopic"] = _httpServer->arg("baseTopic");
+    _onClientFunc(data["clientName"], data["baseTopic"]);
     _httpServer->send(200, "text/html", htmlPage + "Values stored</body></html>");
-    delay(10);
 }
 
+String MQTTServer::replaceFormValues(const String& form) {
+    String result = form;
+    for (auto const& x: data) {
+        String searchString = "[value]=\"" + x.first + "\"";
+        result.replace(searchString, "value=\"" + x.second + "\"");
+    }
+    return result;
+}
+
+String setActiveNav(const String& nav, const String& link) {
+    String result = nav;
+    const String stringToReplace = "href=\"" + link + "\"";
+    const String replaceBy = "class=\"active\" " + stringToReplace;
+    result.replace(stringToReplace, replaceBy);
+    return result;
+}
 
 void MQTTServer::handleClient() {
     _httpServer->handleClient();
@@ -76,16 +91,24 @@ void MQTTServer::registerOnPublishFunction(callback func) {
 void MQTTServer::restServerRouting() {
     PRINTLN_IF_DEBUG("REST SERVER ROUTING")
     _httpServer->on("/", HTTP_GET, []() {
-        _httpServer->send(200, "text/html", htmlPage + htmlWeatherForm);
+        String filledWeatherForm = replaceFormValues(htmlWeatherForm);
+        String topNav = setActiveNav(htmlTopNav, "/");
+        _httpServer->send(200, "text/html", htmlPage + topNav + filledWeatherForm);
     });
     _httpServer->on("/wlan", HTTP_GET, []() {
-        _httpServer->send(200, "text/html", htmlPage + htmlWLANForm);
+        String filledWLANForm = replaceFormValues(htmlWLANForm);
+        String topNav = setActiveNav(htmlTopNav, "/wlan");
+        _httpServer->send(200, "text/html", htmlPage + topNav + filledWLANForm);
     });
     _httpServer->on("/broker", HTTP_GET, []() {
-        _httpServer->send(200, "text/html", htmlPage + htmlBrokerForm);
+        String filledBrokerForm = replaceFormValues(htmlBrokerForm);
+        String topNav = setActiveNav(htmlTopNav, "/broker");
+        _httpServer->send(200, "text/html", htmlPage + topNav + filledBrokerForm);
     });
     _httpServer->on("/client", HTTP_GET, []() {
-        _httpServer->send(200, "text/html", htmlPage + htmlClientForm);
+        String filledClientForm = replaceFormValues(htmlClientForm);
+        String topNav = setActiveNav(htmlTopNav, "/client");
+        _httpServer->send(200, "text/html", htmlPage + topNav + filledClientForm);
     });
     _httpServer->on("/publish", HTTP_PUT, onPublish);
     _httpServer->on("/wlan", HTTP_POST, onWlan);

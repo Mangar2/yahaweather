@@ -13,7 +13,7 @@ const char* htmlWLANForm = R"htmlwlan(
 <div class="container">
   <form action="/wlan" method="POST">
     <label for="ssid">Wlan name</label>
-    <input type="text" id="ssid" name="wlanssid" placeholder="ssid...">
+    <input type="text" id="ssid" name="wlanssid" placeholder="ssid...", [value]="ssid">
 
     <label for="passwd">Wlan Password</label>
     <input type="password" id="passwd" name="wlanpassword" placeholder="password...">
