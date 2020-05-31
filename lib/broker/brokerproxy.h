@@ -10,7 +10,9 @@
  */
 
 #pragma once
+
 #include <Arduino.h>
+#include <vector>
 #include "staticstring.h"
 #include "message.h"
 
@@ -56,6 +58,11 @@ public:
      * Publishes a message to the broker
      */
     void publishMessage(const Message& message);
+
+    /**
+     * Publishes several messages to the broker
+     */
+    void publishMessages(const Messages_t& messages);
 
 private:
     void sendToServer(String urlWithoutHost, String jsonBody, String QoS = ""); 

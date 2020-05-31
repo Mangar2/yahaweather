@@ -82,6 +82,11 @@ public:
      Message getPressureMessage();
 
     /**
+     * Gets all messages to publish
+     */
+    Messages_t getMessages();
+
+    /**
      * Scans the I2CBus and prints addresses of found I2C devices
      */
     void ScanI2CBus();

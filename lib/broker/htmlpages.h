@@ -8,6 +8,7 @@
  * @brief
  * Provides a web page with a configuration form
  */
+#pragma once
 
 #include <Arduino.h>
 #include "htmlstructure.h"

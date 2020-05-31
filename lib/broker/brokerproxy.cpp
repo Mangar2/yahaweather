@@ -77,5 +77,12 @@ void BrokerProxy::subscribe(String topic, uint8_t qos) {
 void BrokerProxy::publishMessage(const Message& message) {
     String body = message.toPublishString();
     String urlWithoutHost = "/publish";
+    PRINTLN_VARIABLE_IF_DEBUG(body);
     sendToServer(urlWithoutHost, body, "0");
+}
+
+void BrokerProxy::publishMessages(const Messages_t& messages) {
+    for (auto const& message: messages) {
+        publishMessage(message);
+    }
 }

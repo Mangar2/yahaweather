@@ -41,6 +41,9 @@ public:
      * Sets data for forms
      */
     static void setData(const String& key, const String& value) { _data[key] = value; }
+    static void setData(std::map<String, String> configuration) { 
+        _data.insert(configuration.begin(), configuration.end()); 
+    }
 
     /**
      * Gets the value of an Argument handed over by a http GET or POST call
@@ -61,6 +64,11 @@ public:
      * @param form html form including surrounding container - div
      */
     static void addForm(const String& uri, const String& form);
+
+    /**
+     * Gets a key/value store of all configuration data
+     */
+    static std::map<String, String> getConfigMap() { return _data; }
 
 private:
     MQTTServer() {

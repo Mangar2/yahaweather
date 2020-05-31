@@ -68,6 +68,9 @@ String MQTTServer::getArgValue(const String& argName) {
 void MQTTServer::on(const String& uri, THandlerFunction handler) {
     _httpServer->on(uri, HTTP_POST, [uri, handler]() {
         PRINTLN_VARIABLE_IF_DEBUG(uri)
+        for (uint16_t i = 0; i < _httpServer->args(); i++) {
+            _data[_httpServer->argName(i)] = _httpServer->arg(i);
+        }
         handler();
         String topNav = setActiveNav(htmlTopNav, uri);
         // $SYS/ESP8266/weather

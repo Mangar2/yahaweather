@@ -12,6 +12,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include <vector>
 #include "json.h"
 
 class Message {
@@ -46,3 +47,5 @@ private:
     String _message;
 
 };
+
+typedef std::vector<Message> Messages_t;

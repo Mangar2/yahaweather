@@ -9,6 +9,8 @@
  * Provides a web page with a configuration form
  */
 
+#pragma once
+
 const char* htmlWLANForm = R"htmlwlan(
 <form action="/wlan" method="POST">
 <label for="ssid">Wlan name</label>

@@ -80,6 +80,16 @@ Message YahaBME280::getPressureMessage()
     return pressureMessage;
 }
 
+Messages_t YahaBME280::getMessages() {
+    Messages_t result;
+    if (isBMEAvailable()) {
+        result.push_back(getTemperatureMessage());
+        result.push_back(getHumidityMessage());
+        result.push_back(getPressureMessage());
+    }
+    return result;
+}
+
 void printScanInfo(String info, uint8_t address)
 {
     Serial.print(info);

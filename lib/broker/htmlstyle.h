@@ -1,3 +1,5 @@
+#pragma once
+
 const char* htmlStyle = R"htmlstyle(
 <style>
 body {font-family: Arial, Helvetica, sans-serif;}

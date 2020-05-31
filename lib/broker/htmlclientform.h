@@ -8,6 +8,7 @@
  * @brief
  * Provides a web page with a configuration form
  */
+#pragma once
 
 const char* htmlClientForm = R"htmlform(
 <form action="/client" method="POST">

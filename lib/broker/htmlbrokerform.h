@@ -8,6 +8,7 @@
  * @brief
  * Provides a web page with a configuration form
  */
+#pragma once
 
 const char* htmlBrokerForm = R"htmlform(
 <form action="/broker" method="POST">
