@@ -19,6 +19,7 @@ struct BrokerConfiguration {
     StaticString<8> brokerPort;
     StaticString<24> clientName;
     StaticString<64> baseTopic;
+    StaticString<64> subscribeTo;
 };
 
 class BrokerProxy {

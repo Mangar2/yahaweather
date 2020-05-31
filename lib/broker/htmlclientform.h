@@ -10,15 +10,13 @@
  */
 
 const char* htmlClientForm = R"htmlform(
-<div class="container">
-  <form action="/client" method="POST">
-    <label for="clientname">Client name</label>
-    <input type="text" id="clientname" name="clientName" [value]="clientName">
-
-    <label for="basetopic">Base topic</label>
-    <input type="text" id="basetopic" name="baseTopic" [value]="baseTopic">
-
-    <input type="submit" value="Submit">
-  </form>
-</div></body></html>
+<form action="/client" method="POST">
+<label for="clientname">Client name</label>
+<input type="text" id="clientname" name="clientName" [value]="clientName">
+<label for="basetopic">Base topic</label>
+<input type="text" id="basetopic" name="baseTopic" [value]="baseTopic">
+<label for="subscribeto">Subscribe topic</label>
+<input type="text" id="subscribeto" name="subscribeTo" [value]="subscribeTo">
+<input type="submit" value="Submit">
+</form>
 )htmlform";

@@ -17,6 +17,7 @@
 
 typedef void (*callback)(const JSON&);
 typedef void (*setCallback)(const String&, const String&);
+typedef std::function<void()> THandlerFunction;
 
 class MQTTServer {
 public:
@@ -37,24 +38,29 @@ public:
     static void registerOnPublishFunction(callback func);
 
     /**
-     * Registeres a function to set the WLAN
-     */
-    static void registerSetWLAN(setCallback setWlanFunc) { _onWLANFunc = setWlanFunc; }
-
-    /**
-     * Registeres a function to set broker connection information
-     */
-    static void registerSetBroker(setCallback setBrokerFunc) { _onBrokerFunc = setBrokerFunc; }
-
-    /**
-     * Registeres a function to set client configuration
-     */
-    static void registerSetClient(setCallback setClientFunc) { _onClientFunc = setClientFunc; }
-
-    /**
      * Sets data for forms
      */
-    static void setData(const String& key, const String& value) { data[key] = value; }
+    static void setData(const String& key, const String& value) { _data[key] = value; }
+
+    /**
+     * Gets the value of an Argument handed over by a http GET or POST call
+     * @param argName name of the argument
+     */
+    static String getArgValue(const String& argName);
+
+    /**
+     * Registers a function beeing called on http/https request
+     * @param uri link the function is registered to
+     * @param handler function to be called
+     */
+    static void on(const String& uri, THandlerFunction handler);
+
+    /**
+     * Adds a form to the mqtt server
+     * @param uri link to access the form
+     * @param form html form including surrounding container - div
+     */
+    void addForm(const String& uri, const String& form);
 
 private:
     MQTTServer() {
@@ -96,6 +102,6 @@ private:
     static callback _onPublishFunc;
     static setCallback _onWLANFunc;
     static setCallback _onBrokerFunc;
-    static setCallback _onClientFunc;
-    static std::map<String, String> data;
+    static std::map<String, String> _data;
+    static std::map<String, String> _forms;
 };

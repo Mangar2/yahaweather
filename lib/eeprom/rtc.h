@@ -46,16 +46,6 @@ namespace RTC {
     void initWakeupCounter(uint16_t startWakeupCounter = 0);
 
     /**
-     * Gets the amount of continuous resets
-     */
-    uint16_t getFastResetAmount();
-
-    /**
-     * Sets the amount of continuous resets
-     */
-    void setFastResetAmount(uint16_t fastResetAmount);
-
-    /**
      * Gets the amount of wakeups encountered
      */
     uint16_t getWakeupAmount();
@@ -69,4 +59,10 @@ namespace RTC {
      * Increase the amount of wakups encountered by one
      */
     void incWakeupAmount(); 
+
+    /**
+     * Gets the fast reset amount read from RTC-Mem at the start
+     */
+    bool isFastReset();
+
 }

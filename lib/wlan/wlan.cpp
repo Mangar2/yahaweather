@@ -33,14 +33,33 @@ void WLAN::reconnect() {
     }
 }
 
- bool WLAN::connect(const WLANConfiguration& configuration) {
-    _ssid = configuration.ssid;
-    _password = configuration.password;
-    return connect();
+ bool WLAN::connect(const WLANConfiguration& configuration, const String& softAPssid) {
+     PRINTLN_VARIABLE_IF_DEBUG(configuration.uuid);
+     PRINTLN_VARIABLE_IF_DEBUG(configuration.ssid);
+     bool result = false;
+     if (configuration.isInitialized()) {
+        _ssid = configuration.ssid;
+        _password = configuration.password;
+        result = connect();
+     } 
+     if (!result) {
+         softAP(softAPssid);
+         delay(500);
+     }
+     return result;
 }
 
 void WLAN::disconnect() {
     WiFi.disconnect();
+    //WiFi.softAPdisconnect(wifioff)
+}
+
+bool WLAN::softAP(const String& ssid) {
+    PRINTLN_IF_DEBUG("Sett up Wifi station in soft ap mode, IP: 192.168.4.1, ssid: " + ssid + " password: admin")
+    
+    bool station = WiFi.softAP(ssid);
+    PRINTLN_VARIABLE_IF_DEBUG(station)
+    return station;
 }
 
 

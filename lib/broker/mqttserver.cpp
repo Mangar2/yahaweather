@@ -14,12 +14,11 @@
 #include "mqttserver.h"
 #include "htmlpages.h"
 
-ESP8266WebServer* MQTTServer::_httpServer;
+ESP8266WebServer* MQTTServer::_httpServer = 0;
 callback MQTTServer::_onPublishFunc = 0;
 setCallback MQTTServer::_onWLANFunc = 0;
 setCallback MQTTServer::_onBrokerFunc = 0;
-setCallback MQTTServer::_onClientFunc = 0;
-std::map<String, String> MQTTServer::data;
+std::map<String, String> MQTTServer::_data;
     
 void MQTTServer::onPublish() {
     String postBody = _httpServer->arg("plain");
@@ -29,7 +28,7 @@ void MQTTServer::onPublish() {
     const String topic = json.getElement("topic");
     if (topic == "$SYS/outdoor/ESP8266/weather/broker/set") {
         _onBrokerFunc(json.getElement("value.brokerHost"), json.getElement("value.brokerPort"));
-        _onClientFunc(json.getElement("value.clientName"), json.getElement("value.baseTopic"));
+        // _onClientFunc(json.getElement("value.clientName"), json.getElement("value.baseTopic"));
     }
     if (topic == "$SYS/outdoor/ESP8266/weather/wlan/set") {
         _onWLANFunc(json.getElement("value.ssid"), json.getElement("value.password"));
@@ -42,30 +41,10 @@ void MQTTServer::onPublish() {
     delay(10);
 }
 
-void MQTTServer::onWlan() {
-    data["ssid"] = _httpServer->arg("ssid");
-    data["password"] = _httpServer->arg("password");
-    _onWLANFunc(data["ssid"], data["password"]);
-    _httpServer->send(200, "text/html", htmlPage + "Values stored</body></html>");
-}
-
-void MQTTServer::onBroker() {
-    data["brokerHost"] = _httpServer->arg("brokerHost");
-    data["brokerPort"] = _httpServer->arg("brokerPort");
-    _onBrokerFunc(data["brokerHost"], data["brokerPort"]);
-    _httpServer->send(200, "text/html", htmlPage + "Values stored</body></html>");
-}
-
-void MQTTServer::onClient() {
-    data["clientName"] = _httpServer->arg("clientName");
-    data["baseTopic"] = _httpServer->arg("baseTopic");
-    _onClientFunc(data["clientName"], data["baseTopic"]);
-    _httpServer->send(200, "text/html", htmlPage + "Values stored</body></html>");
-}
 
 String MQTTServer::replaceFormValues(const String& form) {
     String result = form;
-    for (auto const& x: data) {
+    for (auto const& x: _data) {
         String searchString = "[value]=\"" + x.first + "\"";
         result.replace(searchString, "value=\"" + x.second + "\"");
     }
@@ -78,6 +57,31 @@ String setActiveNav(const String& nav, const String& link) {
     const String replaceBy = "class=\"active\" " + stringToReplace;
     result.replace(stringToReplace, replaceBy);
     return result;
+}
+
+String MQTTServer::getArgValue(const String& argName) {
+    _data[argName] = _httpServer->arg(argName);
+    PRINTLN_VARIABLE_IF_DEBUG(_data[argName])
+    return _data[argName];
+}
+
+void MQTTServer::on(const String& uri, THandlerFunction handler) {
+    _httpServer->on(uri, HTTP_POST, [uri, handler]() {
+        PRINTLN_VARIABLE_IF_DEBUG(uri)
+        handler();
+        String topNav = setActiveNav(htmlTopNav, uri);
+        // $SYS/ESP8266/weather
+        _httpServer->send(200, "text/html", htmlPage + topNav + "Values stored</body></html>");
+    });
+}
+
+void MQTTServer::addForm(const String& uri, const String& form) {
+    _httpServer->on(uri, HTTP_GET, [uri, form]() {
+        String bodyForm = "<div class=\"container\">" + replaceFormValues(form) + "</body></html></div>";
+        String topNav = setActiveNav(htmlTopNav, uri);
+        _httpServer->send(200, "text/html", htmlPage + topNav + bodyForm);
+    });
+
 }
 
 void MQTTServer::handleClient() {
@@ -111,9 +115,6 @@ void MQTTServer::restServerRouting() {
         _httpServer->send(200, "text/html", htmlPage + topNav + filledClientForm);
     });
     _httpServer->on("/publish", HTTP_PUT, onPublish);
-    _httpServer->on("/wlan", HTTP_POST, onWlan);
-    _httpServer->on("/broker", HTTP_POST, onBroker);
-    _httpServer->on("/client", HTTP_POST, onClient);
     _httpServer->onNotFound([]() {
         String message = "Resource not found\n URI: " + _httpServer->uri() + "\n";
         PRINTLN_VARIABLE_IF_DEBUG(message)

@@ -10,15 +10,11 @@
  */
 
 const char* htmlBrokerForm = R"htmlform(
-<div class="container">
-  <form action="/broker" method="POST">
-    <label for="brokerhost">Broker host</label>
-    <input type="text" id="brokerhost" name="brokerHost" placeholder="Broker host...", [value]="brokerHost">
-
-    <label for="brokerport">Broker port</label>
-    <input type="number" id="brokerport" name="brokerPort" [value]="brokerPort">
-
-    <input type="submit" value="Submit">
-  </form>
-</div></body></html>
+<form action="/broker" method="POST">
+<label for="brokerhost">Broker host</label>
+<input type="text" id="brokerhost" name="brokerHost" placeholder="Broker host..." [value]="brokerHost">
+<label for="brokerport">Broker port</label>
+<input type="number" id="brokerport" name="brokerPort" [value]="brokerPort">
+<input type="submit" value="Submit">
+</form>
 )htmlform";

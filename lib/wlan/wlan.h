@@ -14,9 +14,9 @@
 #include "staticstring.h"
 
 struct WLANConfiguration {
-    String getUUID() { return "11896e60-6f3a-46ef-b718-839df2380de5"; }
+    String getUUID() const { return "11896e60-6f3a-46ef-b718-839df2380de5"; }
     void initUUDI() { uuid = getUUID(); }
-    bool isInitialized() { return uuid == getUUID(); }
+    bool isInitialized() const { return uuid == getUUID(); }
     StaticString<38> uuid;
     StaticString<32> ssid;
     StaticString<32> password;
@@ -36,12 +36,16 @@ public:
     static void reconnect();
 
     /**
-     * Connects to wlan
-     * @param ssid ssid of the wlan
-     * @param password password of the wlan
-     */
+     * Connects to wlan, creates a station, if WLAN configuration is invalid
+     * @param configuration WLAN configuraiton object with ssid and password
+     * @param softAPssid ssid of a station, if the WLAN connection is not available
+    */
+    static bool connect(const WLANConfiguration& configuration, const String& softAPssid);
 
-    static bool connect(const WLANConfiguration& configuration);
+    /**
+     * Creates a station used for configuration purpouse
+     */
+    static bool softAP(const String& ssid);
 
     /**
      * Disconnects from wlan
@@ -56,6 +60,7 @@ public:
 
 private:
     static const uint8_t MAX_TRIES = 10 * 5;
+
 
     /**
      * Internal connect function

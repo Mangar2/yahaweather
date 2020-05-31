@@ -10,20 +10,14 @@
  */
 
 const char* htmlWeatherForm = R"htmlweather(
-<div class="container">
-  <form>
-    <label for="temperature">Temperature</label>
-    <input type="text" id="temperature" readonly [value]="temperature">
-
-    <label for="humidity">Humidity</label>
-    <input type="text" id="humidity" readonly [value]="humidity">
-
-    <label for="pressure">Barometric pressure</label>
-    <input type="text" id="pressure" readonly [value]="pressure">
-
-    <label for="battery">Battery voltage</label>
-    <input type="text" id="battery" readonly [value]="battery">
-
-  </form>
-</div></body></html>
+<form>
+<label for="temperature">Temperature</label>
+<input type="text" id="temperature" readonly [value]="temperature">
+<label for="humidity">Humidity</label>
+<input type="text" id="humidity" readonly [value]="humidity">
+<label for="pressure">Barometric pressure</label>
+<input type="text" id="pressure" readonly [value]="pressure">
+<label for="battery">Battery voltage</label>
+<input type="text" id="battery" readonly [value]="battery">
+</form>
 )htmlweather";
