@@ -77,7 +77,7 @@ void MQTTServer::on(const String& uri, THandlerFunction handler) {
 
 void MQTTServer::addForm(const String& uri, const String& form) {
     _httpServer->on(uri, HTTP_GET, [uri, form]() {
-        String bodyForm = "<div class=\"container\">" + replaceFormValues(form) + "</body></html></div>";
+        String bodyForm = "<div class=\"container\">" + replaceFormValues(form) + "</div></body></html>";
         String topNav = setActiveNav(htmlTopNav, uri);
         _httpServer->send(200, "text/html", htmlPage + topNav + bodyForm);
     });
@@ -94,26 +94,9 @@ void MQTTServer::registerOnPublishFunction(callback func) {
 
 void MQTTServer::restServerRouting() {
     PRINTLN_IF_DEBUG("REST SERVER ROUTING")
-    _httpServer->on("/", HTTP_GET, []() {
-        String filledWeatherForm = replaceFormValues(htmlWeatherForm);
-        String topNav = setActiveNav(htmlTopNav, "/");
-        _httpServer->send(200, "text/html", htmlPage + topNav + filledWeatherForm);
-    });
-    _httpServer->on("/wlan", HTTP_GET, []() {
-        String filledWLANForm = replaceFormValues(htmlWLANForm);
-        String topNav = setActiveNav(htmlTopNav, "/wlan");
-        _httpServer->send(200, "text/html", htmlPage + topNav + filledWLANForm);
-    });
-    _httpServer->on("/broker", HTTP_GET, []() {
-        String filledBrokerForm = replaceFormValues(htmlBrokerForm);
-        String topNav = setActiveNav(htmlTopNav, "/broker");
-        _httpServer->send(200, "text/html", htmlPage + topNav + filledBrokerForm);
-    });
-    _httpServer->on("/client", HTTP_GET, []() {
-        String filledClientForm = replaceFormValues(htmlClientForm);
-        String topNav = setActiveNav(htmlTopNav, "/client");
-        _httpServer->send(200, "text/html", htmlPage + topNav + filledClientForm);
-    });
+    addForm("/wlan", htmlWLANForm);
+    addForm("/broker", htmlBrokerForm);
+    addForm("/client", htmlClientForm);
     _httpServer->on("/publish", HTTP_PUT, onPublish);
     _httpServer->onNotFound([]() {
         String message = "Resource not found\n URI: " + _httpServer->uri() + "\n";

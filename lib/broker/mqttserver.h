@@ -60,7 +60,7 @@ public:
      * @param uri link to access the form
      * @param form html form including surrounding container - div
      */
-    void addForm(const String& uri, const String& form);
+    static void addForm(const String& uri, const String& form);
 
 private:
     MQTTServer() {

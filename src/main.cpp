@@ -9,6 +9,8 @@
 #include <rtc.h>
 #include <runtime.h>
 
+#include "htmlweatherform.h"
+
 const uint8_t ACTIVATE_BME280_PIN = 14;
 const uint32_t SERIAL_SPEED = 115200; 
 uint32_t HTTP_REST_PORT = 80;
@@ -34,6 +36,7 @@ void writeConfig() {
 
 void setupMQTTServer() {
     MQTTServer::begin(HTTP_REST_PORT);
+    MQTTServer::addForm("/", htmlWeatherForm);
     MQTTServer::on("/wlan", []() {
         wlanConfiguration.uuid = wlanConfiguration.getUUID();
         wlanConfiguration.ssid = MQTTServer::getArgValue("ssid");

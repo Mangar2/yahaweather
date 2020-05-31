@@ -15,7 +15,6 @@
 #include "htmlbrokerform.h"
 #include "htmlwlanform.h"
 #include "htmlclientform.h"
-#include "htmlweatherform.h"
 #include "htmltopnav.h"
 
 String htmlPage = 
