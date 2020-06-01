@@ -10,20 +10,45 @@
  */
 #pragma once
 #include <Arduino.h>
+#include <map>
 #include "debug.h"
 #include "staticstring.h"
 
-struct WLANConfiguration {
-    String getUUID() const { return "11896e60-6f3a-46ef-b718-839df2380de5"; }
-    void initUUDI() { uuid = getUUID(); }
-    bool isInitialized() const { return uuid == getUUID(); }
-    StaticString<38> uuid;
-    StaticString<32> ssid;
-    StaticString<32> password;
-};
+
 
 class WLAN {
 public:
+
+    struct Configuration {
+        String getUUID() const { return "11896e60-6f3a-46ef-b718-839df2380de5"; }
+        void initUUDI() { uuid = getUUID(); }
+        bool isInitialized() const { return uuid == getUUID(); }
+        StaticString<38> uuid;
+        StaticString<32> ssid;
+        StaticString<32> password;
+
+        /**
+         * Gets the configuration as key/value map
+         */
+        std::map<String, String> get()
+        {
+            std::map<String, String> result;
+            result["ssid"] = ssid;
+            // password is not added here due to security
+            return result;
+        }
+
+        /**
+         * Sets the configuration from a key/value map
+         * @param config configuration settings in a map
+         */
+        void set(std::map<String, String> config)
+        {
+            ssid = config["ssid"];
+            password = config["password"];
+            uuid = getUUID();
+        }
+    };
 
     /**
      * Checks if the WLAN connection is established
@@ -40,7 +65,7 @@ public:
      * @param configuration WLAN configuraiton object with ssid and password
      * @param softAPssid ssid of a station, if the WLAN connection is not available
     */
-    static bool connect(const WLANConfiguration& configuration, const String& softAPssid);
+    static bool connect(const Configuration& configuration, const String& softAPssid);
 
     /**
      * Creates a station used for configuration purpouse
@@ -57,6 +82,10 @@ public:
      */
     static String getLocalIP();
 
+    /**
+     * Form to enter/change wlan settings
+     */
+    static const char* htmlForm;
 
 private:
     static const uint8_t MAX_TRIES = 10 * 5;

@@ -15,8 +15,7 @@
 #include <map>
 #include "json.h"
 
-typedef void (*callback)(const JSON&);
-typedef void (*setCallback)(const String&, const String&);
+typedef std::function<void(std::map<String, String>&)> TOnUpdateFunction;
 typedef std::function<void()> THandlerFunction;
 
 class MQTTServer {
@@ -25,7 +24,7 @@ public:
     /**
      * Starts the server
      */
-    static void begin(uint32_t port);
+    static void begin(uint32_t port = 80);
     
     /**
      * Enables client processing
@@ -35,7 +34,7 @@ public:
     /**
      * Registeres a function called in an on publish request
      */
-    static void registerOnPublishFunction(callback func);
+    static void registerOnUpdateFunction(TOnUpdateFunction handler);
 
     /**
      * Sets data for forms
@@ -44,12 +43,6 @@ public:
     static void setData(std::map<String, String> configuration) { 
         _data.insert(configuration.begin(), configuration.end()); 
     }
-
-    /**
-     * Gets the value of an Argument handed over by a http GET or POST call
-     * @param argName name of the argument
-     */
-    static String getArgValue(const String& argName);
 
     /**
      * Registers a function beeing called on http/https request
@@ -81,22 +74,6 @@ private:
     static void onPublish();
 
     /**
-     * Handles a http POST wlan command to receive form data.
-     */
-    static void onWlan();
-
-    /**
-     * Handles a http POST broker command to receive form data.
-     */
-    static void onBroker();
-
-    /**
-     * Handles a http POST client command to receive form data.
-     */
-    static void onClient();
-
-
-    /**
      * routes the rest messages to a matching function
      */
     static void restServerRouting();
@@ -107,9 +84,7 @@ private:
     static String replaceFormValues(const String& form); 
 
     static ESP8266WebServer* _httpServer;
-    static callback _onPublishFunc;
-    static setCallback _onWLANFunc;
-    static setCallback _onBrokerFunc;
+    static TOnUpdateFunction _onUpdateFunction;
     static std::map<String, String> _data;
     static std::map<String, String> _forms;
 };

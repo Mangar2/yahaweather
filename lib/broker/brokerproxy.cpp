@@ -18,6 +18,34 @@
 #include "brokerproxy.h"
 #include "json.h"
 
+
+/**
+ * Gets the configuration as key/value map
+ */
+std::map<String, String> BrokerProxy::Configuration::get()
+{
+    std::map<String, String> result;
+    result["brokerHost"] = brokerHost;
+    result["brokerPort"] = brokerPort;
+    result["clientName"] = clientName;
+    result["baseTopic"] = baseTopic;
+    result["subscribeTo"] = subscribeTo;
+    return result;
+}
+
+/**
+ * Sets the configuration from a key/value map
+ * @param config configuration settings in a map
+ */
+void BrokerProxy::Configuration::set(std::map<String, String> config)
+{
+    brokerHost = config["brokerHost"];
+    brokerPort = config["brokerPort"];
+    clientName = config["clientName"];
+    baseTopic = config["baseTopic"];
+    subscribeTo = config["subscribeTo"];
+}
+
 void BrokerProxy::sendToServer(String urlWithoutHost, String jsonBody, String QoS) {
     WiFiClient client;
     HTTPClient http;
@@ -54,6 +82,7 @@ void BrokerProxy::connect() {
         jsonStringProperty("port", _port) + "}";
     String urlWithoutHost = "/connect";
     sendToServer(urlWithoutHost, body);
+    subscribe(_config.subscribeTo, 1);
 }
 
 void BrokerProxy::disconnect() {
@@ -77,7 +106,6 @@ void BrokerProxy::subscribe(String topic, uint8_t qos) {
 void BrokerProxy::publishMessage(const Message& message) {
     String body = message.toPublishString();
     String urlWithoutHost = "/publish";
-    PRINTLN_VARIABLE_IF_DEBUG(body);
     sendToServer(urlWithoutHost, body, "0");
 }
 

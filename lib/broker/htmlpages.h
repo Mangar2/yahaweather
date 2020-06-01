@@ -14,7 +14,6 @@
 #include "htmlstructure.h"
 #include "htmlstyle.h"
 #include "htmlbrokerform.h"
-#include "htmlwlanform.h"
 #include "htmlclientform.h"
 #include "htmltopnav.h"
 

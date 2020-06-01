@@ -15,9 +15,7 @@
 #include "htmlpages.h"
 
 ESP8266WebServer* MQTTServer::_httpServer = 0;
-callback MQTTServer::_onPublishFunc = 0;
-setCallback MQTTServer::_onWLANFunc = 0;
-setCallback MQTTServer::_onBrokerFunc = 0;
+TOnUpdateFunction MQTTServer::_onUpdateFunction = 0;
 std::map<String, String> MQTTServer::_data;
     
 void MQTTServer::onPublish() {
@@ -27,12 +25,16 @@ void MQTTServer::onPublish() {
     JSON json(postBody);
     const String topic = json.getElement("topic");
     if (topic == "$SYS/outdoor/ESP8266/weather/broker/set") {
-        _onBrokerFunc(json.getElement("value.brokerHost"), json.getElement("value.brokerPort"));
-        // _onClientFunc(json.getElement("value.clientName"), json.getElement("value.baseTopic"));
+        setData("brokerHost", json.getElement("value.brokerHost"));
+        setData("brokerPort", json.getElement("value.brokerPort"));
+        setData("clientName", json.getElement("value.clientName"));
+        setData("baseTopic", json.getElement("value.baseTopic"));
     }
     if (topic == "$SYS/outdoor/ESP8266/weather/wlan/set") {
-        _onWLANFunc(json.getElement("value.ssid"), json.getElement("value.password"));
+        setData("ssid", json.getElement("value.ssid"));
+        setData("password", json.getElement("value.password"));
     }
+    _onUpdateFunction(_data);
     String id = _httpServer->header("id");
     PRINTLN_VARIABLE_IF_DEBUG(id)
 
@@ -57,12 +59,6 @@ String setActiveNav(const String& nav, const String& link) {
     const String replaceBy = "class=\"active\" " + stringToReplace;
     result.replace(stringToReplace, replaceBy);
     return result;
-}
-
-String MQTTServer::getArgValue(const String& argName) {
-    _data[argName] = _httpServer->arg(argName);
-    PRINTLN_VARIABLE_IF_DEBUG(_data[argName])
-    return _data[argName];
 }
 
 void MQTTServer::on(const String& uri, THandlerFunction handler) {
@@ -91,16 +87,28 @@ void MQTTServer::handleClient() {
     _httpServer->handleClient();
 }
 
-void MQTTServer::registerOnPublishFunction(callback func) {
-    _onPublishFunc = func;
+void MQTTServer::registerOnUpdateFunction(TOnUpdateFunction handler) {
+    _onUpdateFunction = handler;
 }
 
 void MQTTServer::restServerRouting() {
     PRINTLN_IF_DEBUG("REST SERVER ROUTING")
-    addForm("/wlan", htmlWLANForm);
     addForm("/broker", htmlBrokerForm);
     addForm("/client", htmlClientForm);
     _httpServer->on("/publish", HTTP_PUT, onPublish);
+    on("/wlan", []() {
+        _onUpdateFunction(_data);
+    });
+    on("/broker", []() {
+        _onUpdateFunction(_data);
+    });
+    on("/client", []() {
+        _onUpdateFunction(_data);
+    });
+    on("/battery", []() {
+        _onUpdateFunction(_data);
+    });
+
     _httpServer->onNotFound([]() {
         String message = "Resource not found\n URI: " + _httpServer->uri() + "\n";
         PRINTLN_VARIABLE_IF_DEBUG(message)

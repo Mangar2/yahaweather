@@ -22,38 +22,20 @@ public:
         uint16_t normalVoltageSleepTimeInSeconds;
         uint16_t highVoltageSleepTimeInSeconds;
         uint16_t lowVoltageSleepTimeInSeconds;
-        float voltageCalibrationFactor;
+        float voltageCalibrationDivisor;
         float highVoltage;
         float lowVoltage;
 
         /**
          * Gets the configuration as key/value map
          */
-        std::map<String, String> get()
-        {
-            std::map<String, String> result;
-            result["voltageCalibrationFactor"] = voltageCalibrationFactor;
-            result["highVoltageSleepTimeInSeconds"] = highVoltageSleepTimeInSeconds;
-            result["lowVoltageSleepTimeInSeconds"] = lowVoltageSleepTimeInSeconds;
-            result["normalVoltagesleepTimeInSeconds"] = normalVoltageSleepTimeInSeconds;
-            result["highVoltage"] = highVoltage;
-            result["lowVoltage"] = lowVoltage;
-            return result;
-        }
+        std::map<String, String> get();
 
         /**
          * Sets the configuration from a key/value map
          * @param config configuration settings in a map
          */
-        void set(std::map<String, String> config)
-        {
-            voltageCalibrationFactor = config["voltageCalibrationFactor"].toFloat();
-            highVoltageSleepTimeInSeconds = config["highVoltageSleepTimeInSeconds"].toFloat();
-            lowVoltageSleepTimeInSeconds = config["lowVoltageSleepTimeInSeconds"].toFloat();
-            normalVoltageSleepTimeInSeconds = config["normalVoltagesleepTimeInSeconds"].toFloat();
-            highVoltage = config["highVoltage"].toFloat();
-            lowVoltage = config["lowVoltage"].toFloat();
-        }
+        void set(std::map<String, String> config);
     };
     Battery(){};
     Battery(const Configuration &configuration) : _configuration(configuration) {}
@@ -92,6 +74,8 @@ public:
      * Gets a yaha messages to send the battery voltage
      */
     Messages_t getMessages(const String &baseTopic);
+
+    static const char* htmlForm;
 
 private:
     static const uint8_t BATTERY_PIN = A0;

@@ -12,27 +12,40 @@
 #pragma once
 
 #include <Arduino.h>
-#include <vector>
+#include <map>
 #include "staticstring.h"
 #include "message.h"
-
-struct BrokerConfiguration {
-    StaticString<32> brokerHost;
-    StaticString<8> brokerPort;
-    StaticString<24> clientName;
-    StaticString<64> baseTopic;
-    StaticString<64> subscribeTo;
-};
+#include "wlan.h"
 
 class BrokerProxy {
 public:
+
+    struct Configuration {
+        StaticString<32> brokerHost;
+        StaticString<8> brokerPort;
+        StaticString<24> clientName;
+        StaticString<64> baseTopic;
+        StaticString<64> subscribeTo;
+
+        /**
+         * Gets the configuration as key/value map
+         */
+        std::map<String, String> get();
+
+        /**
+         * Sets the configuration from a key/value map
+         * @param config configuration settings in a map
+         */
+        void set(std::map<String, String> config);
+    };
+
     BrokerProxy() {};
     
     /**
      * Sets the configuration
      */
-    void setConfiguration(const BrokerConfiguration& config, String myIPAddress, String myPort) {
-        _IPAddress = myIPAddress;
+    void setConfiguration(const Configuration& config, String myPort = "80") {
+        _IPAddress = WLAN::getLocalIP();
         _port = myPort;
         _config = config;
     }
@@ -64,10 +77,15 @@ public:
      */
     void publishMessages(const Messages_t& messages);
 
+    /**
+     * Gets the base topic for sending messages to the broker
+     */
+    String getBaseTopic() { return _config.baseTopic; }
+
 private:
     void sendToServer(String urlWithoutHost, String jsonBody, String QoS = ""); 
 
-    BrokerConfiguration _config;
+    Configuration _config;
     String _IPAddress;
     String _port;
 

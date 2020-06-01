@@ -16,6 +16,17 @@
 
 String WLAN::_ssid;
 String WLAN::_password;
+const char* WLAN::htmlForm = 
+    R"htmlwlan(
+    <form action="/wlan" method="POST">
+    <label for="ssid">Wlan name</label>
+    <input type="text" id="ssid" name="ssid" placeholder="ssid..." [value]="ssid">
+    <label for="passwd">Wlan Password</label>
+    <input type="password" id="passwd" name="password" placeholder="password...">
+    <input type="submit" value="Submit">
+    </form>
+    )htmlwlan";
+
 
 /**
  * Checks if the WLAN connection is established
@@ -33,7 +44,7 @@ void WLAN::reconnect() {
     }
 }
 
- bool WLAN::connect(const WLANConfiguration& configuration, const String& softAPssid) {
+ bool WLAN::connect(const Configuration& configuration, const String& softAPssid) {
      PRINTLN_VARIABLE_IF_DEBUG(configuration.uuid);
      PRINTLN_VARIABLE_IF_DEBUG(configuration.ssid);
      bool result = false;
