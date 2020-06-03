@@ -18,6 +18,13 @@
 #include "brokerproxy.h"
 #include "json.h"
 
+BrokerProxy::Configuration::Configuration() {
+    brokerHost = "192.168.1.1";
+    brokerPort = "8183";
+    clientName = "ESP2688/Weather/Station";
+    baseTopic = "outdoor/garden/main/weather"; 
+    subscribeTo = "$SYS/ESP8266/weather";
+}
 
 /**
  * Gets the configuration as key/value map

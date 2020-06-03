@@ -19,6 +19,7 @@ class Battery
 public:
     struct Configuration
     {
+        Configuration();
         uint16_t normalVoltageSleepTimeInSeconds;
         uint16_t highVoltageSleepTimeInSeconds;
         uint16_t lowVoltageSleepTimeInSeconds;
@@ -44,6 +45,11 @@ public:
      * Sets the battery configuration
      */
     void setConfiguration(const Configuration &configuration) { _configuration = configuration; }
+
+    /**
+     * Gets the battery configuraiton
+     */
+    Configuration getConfiguration() { return _configuration; }
 
     /**
      * Measures battery voltage

@@ -27,6 +27,8 @@ public:
         StaticString<64> baseTopic;
         StaticString<64> subscribeTo;
 
+        Configuration();
+
         /**
          * Gets the configuration as key/value map
          */
@@ -49,6 +51,11 @@ public:
         _port = myPort;
         _config = config;
     }
+
+    /**
+     * Gets the configuration
+     */
+    Configuration getConfiguration() { return _config; }
 
     /**
      * Connects to the yaha "near-mqtt" broker

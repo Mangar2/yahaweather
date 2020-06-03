@@ -10,6 +10,15 @@
 #include "debug.h"
 #include "battery.h"
 
+Battery::Configuration::Configuration() {
+    highVoltageSleepTimeInSeconds = 120;
+    normalVoltageSleepTimeInSeconds = 900;
+    lowVoltageSleepTimeInSeconds = 3600;
+    voltageCalibrationDivisor = 24;
+    highVoltage = 3.5;
+    lowVoltage = 3.1;
+}
+
 std::map<String, String> Battery::Configuration::get()
 {
     std::map<String, String> result;

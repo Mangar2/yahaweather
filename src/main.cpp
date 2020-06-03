@@ -47,4 +47,13 @@ void loop() {
         server.brokerProxy.publishMessages(bme.getMessages());
     }
     server.loop();
+
+    if (!RTC::isFastReset()) {
+        server.closeDown();
+    } else {
+        for (uint16_t i = 0; i < 5000; i++) {
+            MQTTServer::handleClient();
+            delay(10);
+        }
+    }
 }

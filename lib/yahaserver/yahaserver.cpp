@@ -56,15 +56,6 @@ void YahaServer::loop() {
             delay(10);
         }
     }
-
-    if (!RTC::isFastReset()) {
-        closeDown();
-    } else {
-        for (uint16_t i = 0; i < 5000; i++) {
-            MQTTServer::handleClient();
-            delay(10);
-        }
-    }
 }
 
 void YahaServer::updateConfig(std::map<String, String> config) {
@@ -83,8 +74,13 @@ void YahaServer::setupEEPROM() {
     PRINTLN_IF_DEBUG("Setup EEPROM")
     EEPROMAccess::init();
     EEPROMAccess::read(EEPROM_START_ADDR, (uint8_t*) &_config, sizeof(_config));
-    battery.setConfiguration(_config.battery);
-    brokerProxy.setConfiguration(_config.broker);
+    if (_config.wlan.isInitialized()) {
+        battery.setConfiguration(_config.battery);
+        brokerProxy.setConfiguration(_config.broker);
+    } else {
+        _config.battery = battery.getConfiguration();
+        _config.broker = brokerProxy.getConfiguration();
+    }
     MQTTServer::setData(_config.battery.get());
     MQTTServer::setData(_config.broker.get());
     MQTTServer::setData(_config.wlan.get());

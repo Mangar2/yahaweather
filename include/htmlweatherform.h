@@ -18,6 +18,6 @@ const char* htmlWeatherForm = R"htmlweather(
 <label for="pressure">Barometric pressure</label>
 <input type="text" id="pressure" readonly [value]="pressure">
 <label for="battery">Battery voltage</label>
-<input type="text" id="battery" readonly [value]="battery">
+<input type="text" id="voltage" readonly [value]="voltage">
 </form>
 )htmlweather";
