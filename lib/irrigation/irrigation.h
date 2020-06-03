@@ -43,7 +43,7 @@ public:
          */
         void set(std::map<String, String> config);
     };
-    Irrigation(){};
+    Irrigation(uint8_t pump1Pin = D6, uint8_t pump2Pin = D7) : _pump1Pin(pump1Pin), _pump2Pin(pump2Pin) {};
     Irrigation(const Configuration &config) : _config(config) {}
 
     /**
@@ -59,28 +59,10 @@ public:
 
     /**
      * @param humidity currend measured humidity in percent
-     * @returns true, if the battery voltage is low
-     */
-    bool isLowHumidity(float humidity)
-    {
-        return humidity < _config.lowHumidity;
-    }
-
-    /**
-     * @param humidity currend measured humidity in percent
-     * @returns true, if the humidity is above or equal the high threshold
-     */
-    bool isHighHumidity(float humidity)
-    {
-        return humidity >= _config.highHumidity;
-    }
-
-    /**
-     * @param humidity currend measured humidity in percent
      * @param pumpNo number of the pump to switch (either 1 or 2)
      * @returns the time for irrigation in seconds
      */
-    uint16_t getIrrigationTimeInSeconds(float humidity, uint8_t pumpNo);
+    uint16_t getIrrigationDurationInSeconds(float humidity, uint8_t pumpNo);
 
     /**
      * @param humidity currend measured humidity in percent
@@ -97,4 +79,6 @@ public:
 
 private:
     Configuration _config;
+    uint8_t _pump1Pin;
+    uint8_t _pump2Pin;
 };
