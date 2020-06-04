@@ -54,7 +54,7 @@ public:
     /**
      * Gets the battery configuraiton
      */
-    Configuration getConfiguration() { return _config; }
+    Configuration& getConfiguration() { return _config; }
 
 
     /**
@@ -63,6 +63,14 @@ public:
      * @returns the time for irrigation in seconds
      */
     uint16_t getIrrigationDurationInSeconds(float humidity, uint8_t pumpNo);
+
+    /**
+     * Checks, if irrigation should be done
+     * @param humidity currend measured humidity in percent
+     * @param wakeupAmount amount of wakeups since last irrigation
+     * @returns true, if irrigation should be done
+     */
+    bool doIrrigation(float humidity, uint16_t wakeupAmount);
 
     /**
      * @param humidity currend measured humidity in percent

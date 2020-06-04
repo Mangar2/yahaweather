@@ -34,7 +34,7 @@ public:
         {
             std::map<String, String> result;
             result["ssid"] = ssid;
-            // password is not added here due to security
+            result["password"] = password;
             return result;
         }
 

@@ -47,16 +47,16 @@ public:
     /**
      * Registers a function beeing called on http/https request
      * @param uri link the function is registered to
-     * @param handler function to be called
      */
-    static void on(const String& uri, THandlerFunction handler);
+    static void on(const String& uri);
 
     /**
      * Adds a form to the mqtt server
      * @param uri link to access the form
+     * @param name Name of the form shown in the menu
      * @param form html form including surrounding container - div
      */
-    static void addForm(const String& uri, const String& form);
+    static void addForm(const String& uri, const String& name, const String& form);
 
     /**
      * Gets a key/value store of all configuration data
@@ -82,6 +82,12 @@ private:
      * Replaces values in a form
      */
     static String replaceFormValues(const String& form); 
+
+    /**
+     * Creates the navigation menu
+     * @param activeLink relative link of the currently active page
+     */
+    static String createTopNav(const String& activeLink);
 
     static ESP8266WebServer* _httpServer;
     static TOnUpdateFunction _onUpdateFunction;

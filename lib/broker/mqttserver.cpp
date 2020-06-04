@@ -17,6 +17,7 @@
 ESP8266WebServer* MQTTServer::_httpServer = 0;
 TOnUpdateFunction MQTTServer::_onUpdateFunction = 0;
 std::map<String, String> MQTTServer::_data;
+std::map<String, String> MQTTServer::_forms;
     
 void MQTTServer::onPublish() {
     String postBody = _httpServer->arg("plain");
@@ -53,31 +54,43 @@ String MQTTServer::replaceFormValues(const String& form) {
     return result;
 }
 
-String setActiveNav(const String& nav, const String& link) {
-    String result = nav;
-    const String stringToReplace = "href=\"" + link + "\"";
-    const String replaceBy = "class=\"active\" " + stringToReplace;
-    result.replace(stringToReplace, replaceBy);
-    return result;
+String MQTTServer::createTopNav(const String& activeLink) {
+    String topNav = "<div class=\"topnav\">";
+    for (auto const& form: _forms) {
+        topNav += "<a";
+        if (form.first == activeLink) {
+            topNav += " class=\"active\"";
+        }
+        topNav += " href=\"";
+        topNav += form.first;
+        topNav += "\">";
+        topNav += form.second;
+        topNav += "</a>";
+    }
+    topNav += "</div>";
+    return topNav;
 }
 
-void MQTTServer::on(const String& uri, THandlerFunction handler) {
+void MQTTServer::on(const String& uri) {
+    THandlerFunction handler = []() { _onUpdateFunction(_data); };
     _httpServer->on(uri, HTTP_POST, [uri, handler]() {
         PRINTLN_VARIABLE_IF_DEBUG(uri)
         for (uint16_t i = 0; i < _httpServer->args(); i++) {
             _data[_httpServer->argName(i)] = _httpServer->arg(i);
         }
         handler();
-        String topNav = setActiveNav(htmlTopNav, uri);
+        String topNav = createTopNav(uri);
         // $SYS/ESP8266/weather
         _httpServer->send(200, "text/html", htmlPage + topNav + "Values stored</body></html>");
     });
 }
 
-void MQTTServer::addForm(const String& uri, const String& form) {
+void MQTTServer::addForm(const String& uri, const String& name, const String& form) {
+    _forms[uri] = name;
+    on(uri);
     _httpServer->on(uri, HTTP_GET, [uri, form]() {
         String bodyForm = "<div class=\"container\">" + replaceFormValues(form) + "</div></body></html>";
-        String topNav = setActiveNav(htmlTopNav, uri);
+        String topNav = createTopNav(uri);
         _httpServer->send(200, "text/html", htmlPage + topNav + bodyForm);
     });
 
@@ -93,21 +106,9 @@ void MQTTServer::registerOnUpdateFunction(TOnUpdateFunction handler) {
 
 void MQTTServer::restServerRouting() {
     PRINTLN_IF_DEBUG("REST SERVER ROUTING")
-    addForm("/broker", htmlBrokerForm);
-    addForm("/client", htmlClientForm);
+    addForm("/broker", "Broker", htmlBrokerForm);
+    addForm("/client", "Client", htmlClientForm);
     _httpServer->on("/publish", HTTP_PUT, onPublish);
-    on("/wlan", []() {
-        _onUpdateFunction(_data);
-    });
-    on("/broker", []() {
-        _onUpdateFunction(_data);
-    });
-    on("/client", []() {
-        _onUpdateFunction(_data);
-    });
-    on("/battery", []() {
-        _onUpdateFunction(_data);
-    });
 
     _httpServer->onNotFound([]() {
         String message = "Resource not found\n URI: " + _httpServer->uri() + "\n";

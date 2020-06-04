@@ -55,7 +55,7 @@ public:
     /**
      * Gets the configuration
      */
-    Configuration getConfiguration() { return _config; }
+    Configuration& getConfiguration() { return _config; }
 
     /**
      * Connects to the yaha "near-mqtt" broker

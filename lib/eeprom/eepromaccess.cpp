@@ -56,13 +56,16 @@ namespace EEPROMAccess {
         }
     }
 
-    void write(uint16_t baseAddress, const uint8_t* data, uint16_t size) {
+    uint16_t write(uint16_t baseAddress, const uint8_t* data, uint16_t size) {
+        uint16_t result = 0;
         if (baseAddress + size < EEPROM_SIZE) {
             for (uint16_t i = 0; i < size; i++)
             {
                 EEPROM.write(i + baseAddress, data[i]);
             }
+            result = size;
         }
+        return result;
     }
 
 

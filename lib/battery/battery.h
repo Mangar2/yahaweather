@@ -49,7 +49,7 @@ public:
     /**
      * Gets the battery configuraiton
      */
-    Configuration getConfiguration() { return _configuration; }
+    Configuration& getConfiguration() { return _configuration; }
 
     /**
      * Measures battery voltage

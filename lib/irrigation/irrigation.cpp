@@ -7,6 +7,7 @@
  * @copyright Copyright (c) 2020 Volker Böhm
  */
 
+#define __DEBUG
 #include "debug.h"
 #include "irrigation.h"
 
@@ -44,14 +45,14 @@ const char* Irrigation::htmlForm =
     <label for="Humidity">Current humidity</label>
     <input type="text" id="Humidity" name="humidity" [value]="humidity">
 
-    <label for="lowIrrigationDurationInSeconds">Low irrigation duration in seconds (30% rH)</label>
+    <label for="lowIrrigationDurationInSeconds">Low humidity irrigation duration in seconds (30% rH)</label>
     <input type="text" id="lowIrrigationDurationInSeconds" name="lowIrrigationDurationInSeconds" [value]="lowIrrigationDurationInSeconds">
-    <label for="lowWakeupUntilIrrigation">Low amount of wakeups until irrigation (30% rH)</label>
+    <label for="lowWakeupUntilIrrigation">Low humidity amount of wakeups until irrigation (30% rH)</label>
     <input type="text" id="lowWakeupUntilIrrigation" name="lowWakeupUntilIrrigation" [value]="lowWakeupUntilIrrigation">
 
-    <label for="highIrrigationDurationInSeconds">High irrigation duration in seconds (60% rH)</label>
+    <label for="highIrrigationDurationInSeconds">High humidity irrigation duration in seconds (60% rH)</label>
     <input type="text" id="highIrrigationDurationInSeconds" name="highIrrigationDurationInSeconds" [value]="highIrrigationDurationInSeconds">
-    <label for="highWakeupUntilIrrigation">High amount of wakeups until irrigation (60% rH)</label>
+    <label for="highWakeupUntilIrrigation">High humidity amount of wakeups until irrigation (60% rH)</label>
     <input type="text" id="highWakeupUntilIrrigation" name="highWakeupUntilIrrigation" [value]="highWakeupUntilIrrigation">
 
     <label for="pump2Factor">Duration factor for pump 2</label>
@@ -79,7 +80,6 @@ Messages_t Irrigation::getMessages(const String& baseTopic, float humidity) {
 }
 
 uint16_t Irrigation::getIrrigationDurationInSeconds(float humidity, uint8_t pumpNo) {
-    uint16_t duration;
     float humidityDifference = 60 - 30;
     float irrigationDifference = _config.highIrrigationDurationInSeconds - _config.lowIrrigationDurationInSeconds;
     float relativeIrrigation = irrigationDifference / humidityDifference;
@@ -109,4 +109,12 @@ void Irrigation::runIrrigation(float humidity) {
         digitalWrite(pumpPin, LOW);
         PRINTLN_IF_DEBUG(" Pump off");
     }
+}
+
+bool Irrigation::doIrrigation(float humidity, uint16_t wakeupAmount) {
+    float humidityDifference = 60 - 30;
+    float wakeupDifference = _config.highWakeupUntilIrrigation - _config.lowWakeupUntilIrrigation;
+    float relativeWakeup = wakeupDifference / humidityDifference;
+    uint16_t neededWakeupAmount = (humidity - 30) * relativeWakeup + _config.lowWakeupUntilIrrigation;
+    return wakeupAmount >= neededWakeupAmount;
 }

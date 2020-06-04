@@ -19,6 +19,7 @@
 #include <rtc.h>
 #include <runtime.h>
 #include <battery.h>
+#include <irrigation.h>
 
 class YahaServer {
 public:
@@ -51,6 +52,7 @@ public:
     static Battery battery;
     static Runtime runtime;
     static BrokerProxy brokerProxy;
+    static Irrigation irrigation;
 
 private:
 
@@ -58,6 +60,7 @@ private:
         BrokerProxy::Configuration broker;
         WLAN::Configuration wlan;
         Battery::Configuration battery;
+        Irrigation::Configuration irrigation;
     };
 
     static Configuration _config;

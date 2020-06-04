@@ -41,8 +41,9 @@ namespace EEPROMAccess {
      * @param baseAddress start address in the eeprom
      * @param data data to write
      * @param size size of the data structure
+     * @returns amount of bytes written
      */
-    void write(uint16_t baseAddress, const uint8_t* data, uint16_t size);
+    uint16_t write(uint16_t baseAddress, const uint8_t* data, uint16_t size);
 
     /**
      * Commits all write accesses
