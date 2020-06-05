@@ -10,6 +10,7 @@
  */
 
 #pragma once
+#include <map>
 #include <Arduino.h>
 
 /**
@@ -28,6 +29,8 @@ String jsonObjectProperty(String name, String object);
 
 class JSONTokenizer;
 
+typedef std::map<String, String> TJSONObject;
+
 class JSON {
 public:
 	JSON(const String& jsonString) :_jsonString(jsonString) {}
@@ -37,6 +40,11 @@ public:
 	* @param jsonPath path of the for a.b[x] (as in javaScript)
 	*/
 	String getElement(String jsonPath) const;
+
+    /**
+     * Parses an object in JSON notation {...} and returns it as map
+     */
+    TJSONObject parseObject(String jsonPath) const;
 
 private:
 	String _jsonString;

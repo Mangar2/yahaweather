@@ -24,16 +24,10 @@ void MQTTServer::onPublish() {
     PRINTLN_IF_DEBUG("Received PUT publish command body:");
     PRINTLN_IF_DEBUG(postBody);
     JSON json(postBody);
-    const String topic = json.getElement("topic");
-    if (topic == "$SYS/outdoor/ESP8266/weather/broker/set") {
-        setData("brokerHost", json.getElement("value.brokerHost"));
-        setData("brokerPort", json.getElement("value.brokerPort"));
-        setData("clientName", json.getElement("value.clientName"));
-        setData("baseTopic", json.getElement("value.baseTopic"));
-    }
-    if (topic == "$SYS/outdoor/ESP8266/weather/wlan/set") {
-        setData("ssid", json.getElement("value.ssid"));
-        setData("password", json.getElement("value.password"));
+    setData(json.parseObject("value"));
+    for (auto const& x: _data) {
+        PRINTLN_VARIABLE_IF_DEBUG(x.first);
+        PRINTLN_VARIABLE_IF_DEBUG(x.second);
     }
     _onUpdateFunction(_data);
     String id = _httpServer->header("id");

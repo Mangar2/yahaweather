@@ -81,12 +81,13 @@ void BrokerProxy::sendToServer(String urlWithoutHost, String jsonBody, String Qo
     delay(10);
 }
 
-void BrokerProxy::connect() {
+void BrokerProxy::connect(const String& port) {
+    String host = WLAN::getLocalIP();
     String body = "{" + 
         jsonStringProperty("clientId", _config.clientName) + "," + 
         jsonStringProperty("clean", "false") + "," + 
-        jsonStringProperty("host", _IPAddress) + "," + 
-        jsonStringProperty("port", _port) + "}";
+        jsonStringProperty("host", host) + "," + 
+        jsonStringProperty("port", port) + "}";
     String urlWithoutHost = "/connect";
     sendToServer(urlWithoutHost, body);
     subscribe(_config.subscribeTo, 1);

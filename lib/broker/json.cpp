@@ -30,6 +30,16 @@ String jsonObjectProperty(String name, String object) {
 	return String("\"" + name + "\": " + object);
 }
 
+String unquote(const String& quotedString) {
+    String result;
+    if (quotedString.charAt(0) == '"' && quotedString.charAt(quotedString.length() - 1) == '"') {
+		result = quotedString.substring(1, quotedString.length() - 1);
+	} else {
+        result = quotedString;
+    }
+    return result;
+}
+
 /**
   * Gets the content of an array
   * @param json string tokenizer
@@ -189,16 +199,29 @@ String JSON::getElementRec(JSONTokenizer& json, JSONTokenizer& path) const {
 	return result;
 }
 
-/**
-* Gets an element from the JSON fromatted string based on a json path
-* @param jsonPath path of the for a.b[x] (as in javaScript)
-*/
 String JSON::getElement(String jsonPath) const {
 	JSONTokenizer json(_jsonString);
 	JSONTokenizer path(jsonPath);
-	String result = getElementRec(json, path);
-	if (result.charAt(0) == '"' && result.charAt(result.length() - 1) == '"') {
-		result = result.substring(1, result.length() - 1);
-	}
+	String result = unquote(getElementRec(json, path));
 	return result;
+}
+
+TJSONObject JSON::parseObject(String jsonPath) const {
+    TJSONObject result;
+    String subObject = getElement(jsonPath);
+    JSONTokenizer json(subObject);
+	json.skipExpectedToken("{");
+	String tk = json.getNextToken();
+	while (tk != "}") {
+		json.skipExpectedToken(":");
+		result[unquote(tk)] = unquote(getNextObject(json));
+		tk = json.getNextToken();
+		if (tk == ",") {
+		    tk = json.getNextToken();
+		} else if (tk != "}") {
+			json.setError("} or ,");
+			break;
+		}
+	}
+    return result;
 }

@@ -41,7 +41,9 @@ public:
      */
     static void setData(const String& key, const String& value) { _data[key] = value; }
     static void setData(std::map<String, String> configuration) { 
-        _data.insert(configuration.begin(), configuration.end()); 
+        for (auto const& x: configuration) {
+            _data[x.first] = x.second;
+        }
     }
 
     /**

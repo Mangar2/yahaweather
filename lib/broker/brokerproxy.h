@@ -46,9 +46,7 @@ public:
     /**
      * Sets the configuration
      */
-    void setConfiguration(const Configuration& config, String myPort = "80") {
-        _IPAddress = WLAN::getLocalIP();
-        _port = myPort;
+    void setConfiguration(const Configuration& config) {
         _config = config;
     }
 
@@ -60,7 +58,7 @@ public:
     /**
      * Connects to the yaha "near-mqtt" broker
      */
-    void connect();
+    void connect(const String& port = "80");
 
     /**
      * Disconnects from the broker
