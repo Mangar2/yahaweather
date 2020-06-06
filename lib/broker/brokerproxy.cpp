@@ -15,8 +15,10 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266HTTPClient.h>
+#include <map>
 #include "brokerproxy.h"
 #include "json.h"
+
 
 BrokerProxy::Configuration::Configuration() {
     brokerHost = "192.168.1.1";
@@ -53,7 +55,7 @@ void BrokerProxy::Configuration::set(std::map<String, String> config)
     subscribeTo = config["subscribeTo"];
 }
 
-void BrokerProxy::sendToServer(String urlWithoutHost, String jsonBody, String QoS) {
+void BrokerProxy::sendToServer(String urlWithoutHost, String jsonBody, headers_t headers) {
     WiFiClient client;
     HTTPClient http;
     uint16_t httpCode;
@@ -62,15 +64,14 @@ void BrokerProxy::sendToServer(String urlWithoutHost, String jsonBody, String Qo
     PRINT_IF_DEBUG(url);
     PRINT_IF_DEBUG(" ");
     PRINT_VARIABLE_IF_DEBUG(jsonBody);
-    PRINT_VARIABLE_IF_DEBUG(QoS);
     
     delay(5);
     
     http.begin(client, url);
     http.addHeader("Content-Type", "application/json");
     http.addHeader("cache-control", "no-cache");
-    if (QoS != "") {
-        http.addHeader("QoS", QoS);
+    for (auto const& header: headers) {
+        http.addHeader(header.first, header.second);
     }
 
     httpCode = http.PUT(jsonBody);
@@ -87,10 +88,12 @@ void BrokerProxy::connect(const String& port) {
         jsonStringProperty("clientId", _config.clientName) + "," + 
         jsonStringProperty("clean", "false") + "," + 
         jsonStringProperty("host", host) + "," + 
-        jsonStringProperty("port", port) + "}";
+        jsonStringProperty("port", port) + "," +
+        jsonStringProperty("clean", "false") + "," + 
+        jsonStringProperty("keepAlive", "100") + "}";
     String urlWithoutHost = "/connect";
     sendToServer(urlWithoutHost, body);
-    subscribe(_config.subscribeTo, 1);
+
 }
 
 void BrokerProxy::disconnect() {
@@ -106,19 +109,29 @@ void BrokerProxy::subscribe(String topic, uint8_t qos) {
             jsonStringProperty("QoS", String(qos)) + "," + 
             jsonStringProperty("topics", topic) + "}")
         + "}";
+
+    String bodyV1 = "{" +
+        jsonStringProperty("clientId", _config.clientName) + "," + 
+        jsonObjectProperty("subscribe", "{" + 
+            jsonStringProperty(topic, String(qos))
+        ) + "}";
         
     String urlWithoutHost = "/subscribe";
     sendToServer(urlWithoutHost, body);
 }
 
-void BrokerProxy::publishMessage(const Message& message) {
+void BrokerProxy::publishMessage(const Message& message, bool retain) {
     String body = message.toPublishString();
     String urlWithoutHost = "/publish";
-    sendToServer(urlWithoutHost, body, "0");
+    headers_t headers;
+    headers["qos"] = "0";
+    headers["version"] = "1.0";
+    headers["retain"] = retain ? "1" : "0";
+    sendToServer(urlWithoutHost, body, headers);
 }
 
-void BrokerProxy::publishMessages(const Messages_t& messages) {
+void BrokerProxy::publishMessages(const Messages_t& messages, bool retain) {
     for (auto const& message: messages) {
-        publishMessage(message);
+        publishMessage(message, retain);
     }
 }

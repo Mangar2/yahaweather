@@ -13,6 +13,7 @@
 #include <Arduino.h>
 #include <ESP8266WebServer.h>
 #include <map>
+#include <message.h>
 #include "json.h"
 
 typedef std::function<void(std::map<String, String>&)> TOnUpdateFunction;
@@ -64,6 +65,13 @@ public:
      * Gets a key/value store of all configuration data
      */
     static std::map<String, String> getConfigMap() { return _data; }
+
+    /**
+     * Gets an array of messages to be send to the broker
+     * @param baseTopic start string of the topic
+     * @returns a list of all available values beside password as messages
+     */
+    static Messages_t getMessages(const String& baseTopic);
 
 private:
     MQTTServer() {

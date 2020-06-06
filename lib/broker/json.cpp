@@ -206,8 +206,8 @@ String JSON::getElement(String jsonPath) const {
 	return result;
 }
 
-TJSONObject JSON::parseObject(String jsonPath) const {
-    TJSONObject result;
+jsonObject_t JSON::parseObject(String jsonPath) const {
+    jsonObject_t result;
     String subObject = getElement(jsonPath);
     JSONTokenizer json(subObject);
 	json.skipExpectedToken("{");

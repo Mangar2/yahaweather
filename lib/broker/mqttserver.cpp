@@ -24,11 +24,12 @@ void MQTTServer::onPublish() {
     PRINTLN_IF_DEBUG("Received PUT publish command body:");
     PRINTLN_IF_DEBUG(postBody);
     JSON json(postBody);
-    setData(json.parseObject("value"));
-    for (auto const& x: _data) {
-        PRINTLN_VARIABLE_IF_DEBUG(x.first);
-        PRINTLN_VARIABLE_IF_DEBUG(x.second);
-    }
+    String topic = json.getElement("topic");
+    String value = json.getElement("value");
+    topic.replace("/set", "");
+    uint16_t lastChunkStart = topic.lastIndexOf("/");
+    String propertyName = topic.substring(lastChunkStart + 1);
+    setData(propertyName, value);
     _onUpdateFunction(_data);
     String id = _httpServer->header("id");
     PRINTLN_VARIABLE_IF_DEBUG(id)
@@ -117,5 +118,20 @@ void MQTTServer::begin(uint32_t port) {
     const char* headers[] = {"id"};
     _httpServer->collectHeaders(headers, sizeof(headers)/ sizeof(headers[0]));
     _httpServer->begin();
+}
+
+
+Messages_t MQTTServer::getMessages(const String& baseTopic) {
+    Messages_t result;
+    for (auto const& property: _data) {
+        String lowerCasePropertyName = property.first;
+        lowerCasePropertyName.toLowerCase();
+        if (lowerCasePropertyName == "password") {
+            continue;
+        }
+        const Message propertyMessage(baseTopic + property.first, property.second, "info from ESP8266");
+        result.push_back(propertyMessage);
+    }
+    return result;
 }
 

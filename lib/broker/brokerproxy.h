@@ -17,6 +17,8 @@
 #include "message.h"
 #include "wlan.h"
 
+typedef std::map<String, String> headers_t;
+
 class BrokerProxy {
 public:
 
@@ -74,13 +76,17 @@ public:
 
     /**
      * Publishes a message to the broker
+     * @param message message to publish
+     * @param retain if true, the broker will retain the message
      */
-    void publishMessage(const Message& message);
+    void publishMessage(const Message& message, bool retain = false);
 
     /**
      * Publishes several messages to the broker
+     * @param message messages to publish
+     * @param retain if true, the broker will retain the messages
      */
-    void publishMessages(const Messages_t& messages);
+    void publishMessages(const Messages_t& messages, bool retain = false);
 
     /**
      * Gets the base topic for sending messages to the broker
@@ -88,7 +94,13 @@ public:
     String getBaseTopic() { return _config.baseTopic; }
 
 private:
-    void sendToServer(String urlWithoutHost, String jsonBody, String QoS = ""); 
+    /**
+     * Sends an info to the mqtt broker
+     * @param urlWithoutHost url 
+     * @param jsonBody body of the message in json format
+     * @param headers list of headers
+     */
+    void sendToServer(String urlWithoutHost, String jsonBody, headers_t headers = headers_t()); 
 
     Configuration _config;
     String _IPAddress;

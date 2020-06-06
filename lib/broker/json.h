@@ -29,7 +29,7 @@ String jsonObjectProperty(String name, String object);
 
 class JSONTokenizer;
 
-typedef std::map<String, String> TJSONObject;
+typedef std::map<String, String> jsonObject_t;
 
 class JSON {
 public:
@@ -44,7 +44,7 @@ public:
     /**
      * Parses an object in JSON notation {...} and returns it as map
      */
-    TJSONObject parseObject(String jsonPath) const;
+    jsonObject_t parseObject(String jsonPath) const;
 
 private:
 	String _jsonString;

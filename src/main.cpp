@@ -57,6 +57,7 @@ void loop() {
     PRINTLN_VARIABLE_IF_DEBUG(RTC::getWakeupAmount());
     if (server.irrigation.doIrrigation(humidity, RTC::getWakeupAmount())) {
         server.brokerProxy.publishMessages(server.irrigation.getMessages(server.brokerProxy.getBaseTopic(), humidity));
+        server.brokerProxy.publishMessages(MQTTServer::getMessages(server.brokerProxy.getBaseTopic()));
         server.irrigation.runIrrigation(humidity);
         RTC::setWakeupAmount(0);
     }
