@@ -9,7 +9,6 @@
  * Provides a class to connect to WLAN
  */
 
-#define __DEBUG
 #include <Arduino.h>
 #include "debug.h"
 #include <ESP8266WiFi.h>
@@ -28,9 +27,6 @@ BrokerProxy::Configuration::Configuration() {
     subscribeTo = "outdoor/garden/main/weather/+/set";
 }
 
-/**
- * Gets the configuration as key/value map
- */
 std::map<String, String> BrokerProxy::Configuration::get()
 {
     std::map<String, String> result;
@@ -42,10 +38,6 @@ std::map<String, String> BrokerProxy::Configuration::get()
     return result;
 }
 
-/**
- * Sets the configuration from a key/value map
- * @param config configuration settings in a map
- */
 void BrokerProxy::Configuration::set(std::map<String, String> config)
 {
     brokerHost = config["brokerHost"];
@@ -58,7 +50,6 @@ void BrokerProxy::Configuration::set(std::map<String, String> config)
 void BrokerProxy::sendToServer(String urlWithoutHost, String jsonBody, headers_t headers) {
     WiFiClient client;
     HTTPClient http;
-    uint16_t httpCode;
     String url = String("http://") + _config.brokerHost + ":" + _config.brokerPort + urlWithoutHost;
     
     PRINT_IF_DEBUG(url);
@@ -74,7 +65,7 @@ void BrokerProxy::sendToServer(String urlWithoutHost, String jsonBody, headers_t
         http.addHeader(header.first, header.second);
     }
 
-    httpCode = http.PUT(jsonBody);
+    IF_DEBUG(uint16_t httpCode =) http.PUT(jsonBody);
     PRINT_VARIABLE_IF_DEBUG(httpCode);
     IF_DEBUG(http.writeToStream(&Serial);)
     PRINTLN_IF_DEBUG("");

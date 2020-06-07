@@ -8,7 +8,6 @@
  * @brief
  * Provides a class to connect to WLAN
  */
-#define __DEBUG
 #include "debug.h"
 #include "message.h"
 #include "yahabme280.h"

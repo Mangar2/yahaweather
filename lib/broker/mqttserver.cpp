@@ -9,7 +9,6 @@
  * Provides a web server waiting for yaha mqtt commands
  */
 
-#define __DEBUG
 #include "debug.h"
 #include "mqttserver.h"
 #include "htmlpages.h"
