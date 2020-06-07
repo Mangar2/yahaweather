@@ -82,6 +82,7 @@ void YahaServer::setupEEPROM() {
         brokerProxy.setConfiguration(_config.broker);
         irrigation.setConfiguration(_config.irrigation);
     } else {
+        _config.wlan.clear();
         _config.battery = battery.getConfiguration();
         _config.broker = brokerProxy.getConfiguration();
         _config.irrigation = irrigation.getConfiguration();

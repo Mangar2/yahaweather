@@ -25,7 +25,7 @@ std::map<String, String> Battery::Configuration::get()
     result["voltageCalibrationDivisor"] = voltageCalibrationDivisor;
     result["highVoltageSleepTimeInSeconds"] = highVoltageSleepTimeInSeconds;
     result["lowVoltageSleepTimeInSeconds"] = lowVoltageSleepTimeInSeconds;
-    result["normalVoltagesleepTimeInSeconds"] = normalVoltageSleepTimeInSeconds;
+    result["normalVoltageSleepTimeInSeconds"] = normalVoltageSleepTimeInSeconds;
     result["highVoltage"] = highVoltage;
     result["lowVoltage"] = lowVoltage;
     return result;
@@ -36,7 +36,7 @@ void Battery::Configuration::set(std::map<String, String> config)
     voltageCalibrationDivisor = config["voltageCalibrationDivisor"].toFloat();
     highVoltageSleepTimeInSeconds = config["highVoltageSleepTimeInSeconds"].toFloat();
     lowVoltageSleepTimeInSeconds = config["lowVoltageSleepTimeInSeconds"].toFloat();
-    normalVoltageSleepTimeInSeconds = config["normalVoltagesleepTimeInSeconds"].toFloat();
+    normalVoltageSleepTimeInSeconds = config["normalVoltageSleepTimeInSeconds"].toFloat();
     highVoltage = config["highVoltage"].toFloat();
     lowVoltage = config["lowVoltage"].toFloat();
 }
@@ -55,7 +55,7 @@ const char* Battery::htmlForm =
     <label for="highTime">High voltage sleep time in seconds</label>
     <input type="text" id="highTime" name="highVoltageSleepTimeInSeconds" [value]="highVoltageSleepTimeInSeconds">
     <label for="normalTime">Normal voltage sleep time in seconds</label>
-    <input type="text" id="normalTime" name="normalVoltagesleepTimeInSeconds" [value]="normalVoltagesleepTimeInSeconds">
+    <input type="text" id="normalTime" name="normalVoltageSleepTimeInSeconds" [value]="normalVoltageSleepTimeInSeconds">
     <label for="normalTime">Low voltage sleep time in seconds</label>
     <input type="text" id="lowTime" name="lowVoltageSleepTimeInSeconds" [value]="lowVoltageSleepTimeInSeconds">
     <input type="submit" value="Submit">

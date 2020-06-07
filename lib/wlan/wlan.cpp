@@ -55,7 +55,7 @@ void WLAN::reconnect() {
      } 
      if (!result) {
          softAP(softAPssid);
-         delay(500);
+         delay(2000);
      }
      return result;
 }

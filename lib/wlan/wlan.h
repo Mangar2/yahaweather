@@ -27,6 +27,7 @@ public:
         StaticString<32> ssid;
         StaticString<32> password;
 
+        void clear() { ssid = ""; password = ""; }
         /**
          * Gets the configuration as key/value map
          */

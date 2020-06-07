@@ -129,7 +129,7 @@ Messages_t MQTTServer::getMessages(const String& baseTopic) {
         if (lowerCasePropertyName == "password") {
             continue;
         }
-        const Message propertyMessage(baseTopic + property.first, property.second, "info from ESP8266");
+        const Message propertyMessage(baseTopic + "/" + property.first, property.second, "info from ESP8266");
         result.push_back(propertyMessage);
     }
     return result;

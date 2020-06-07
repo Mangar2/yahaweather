@@ -62,6 +62,20 @@ const char* Irrigation::htmlForm =
     </form>
     )htmlform";
 
+Irrigation::Irrigation(uint8_t pump1Pin, uint8_t pump2Pin)
+ : _pump1Pin(pump1Pin), _pump2Pin(pump2Pin) {
+    digitalWrite(pump1Pin, LOW); 
+    digitalWrite(pump2Pin, LOW); 
+    pinMode(pump1Pin, OUTPUT); 
+    pinMode(pump2Pin, OUTPUT); 
+    PRINTLN_VARIABLE_IF_DEBUG(pump1Pin);
+    PRINTLN_IF_DEBUG("test high")
+    digitalWrite(pump1Pin, HIGH);
+    delay(2000);
+    digitalWrite(pump1Pin, LOW);
+    PRINTLN_IF_DEBUG("test low")
+};
+
 Messages_t Irrigation::getMessages(const String& baseTopic, float humidity) {
 
     std::vector<Message> result;
@@ -94,13 +108,14 @@ void Irrigation::runIrrigation(float humidity) {
     const uint32_t MILLISECONDS_IN_A_SECOND = 1000;
     for (int pumpNo = 1; pumpNo <= 2; pumpNo++) {
         const uint16_t timeInSeconds = getIrrigationDurationInSeconds(humidity, pumpNo);
-        const uint8_t pumpPin = pumpNo == 1 ? _config.pump1Pin : _config.pump2Pin;
+        const uint8_t pumpPin = pumpNo == 1 ? _pump1Pin : _pump2Pin;
         PRINT_IF_DEBUG("Pump ");
         PRINT_IF_DEBUG(pumpNo)
         PRINT_IF_DEBUG(" on for ");
         PRINT_IF_DEBUG(timeInSeconds / 60);
         PRINT_IF_DEBUG(":");
         PRINT_IF_DEBUG(timeInSeconds % 60);
+        PRINTLN_VARIABLE_IF_DEBUG(pumpPin)
         digitalWrite(pumpPin, HIGH);
         for (uint16_t cnt = 0; cnt < timeInSeconds; cnt ++) {
             PRINT_IF_DEBUG(".");

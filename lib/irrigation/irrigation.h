@@ -43,8 +43,7 @@ public:
          */
         void set(std::map<String, String> config);
     };
-    Irrigation(uint8_t pump1Pin = D6, uint8_t pump2Pin = D7) : _pump1Pin(pump1Pin), _pump2Pin(pump2Pin) {};
-    Irrigation(const Configuration &config) : _config(config) {}
+    Irrigation(uint8_t pump1Pin = D6, uint8_t pump2Pin = D7); 
 
     /**
      * Sets the battery config

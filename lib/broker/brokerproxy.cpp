@@ -23,9 +23,9 @@
 BrokerProxy::Configuration::Configuration() {
     brokerHost = "192.168.1.1";
     brokerPort = "8183";
-    clientName = "ESP2688/Weather/Station";
+    clientName = "ESP8266/Weather/Station";
     baseTopic = "outdoor/garden/main/weather"; 
-    subscribeTo = "$SYS/ESP8266/weather";
+    subscribeTo = "outdoor/garden/main/weather/+/set";
 }
 
 /**
@@ -93,7 +93,7 @@ void BrokerProxy::connect(const String& port) {
         jsonStringProperty("keepAlive", "100") + "}";
     String urlWithoutHost = "/connect";
     sendToServer(urlWithoutHost, body);
-
+    subscribe(_config.subscribeTo, 1);
 }
 
 void BrokerProxy::disconnect() {

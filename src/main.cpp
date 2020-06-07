@@ -38,7 +38,7 @@ void setup() {
 
     bme.activate(ACTIVATE_BME280_PIN);
     bme.setBaseTopic(server.brokerProxy.getBaseTopic());
-    bme.init(0x77);
+    bme.init(0x76);
 }
 
 /**

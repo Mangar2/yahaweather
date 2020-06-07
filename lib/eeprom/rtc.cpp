@@ -68,15 +68,24 @@ uint32_t RTC::getRtcTime() {
 }
 
 void RTC::initWakeupCounter(uint16_t startWakeupCounter) {
-    uint32_t startValue = RTCMem<uint32_t>::read(MAGIC_NUMBER_ADDR);
-    if (startValue != MAGIC_NUMBER) {
-        PRINTLN_VARIABLE_IF_DEBUG(startValue)
+    uint32_t magicNumber = RTCMem<uint32_t>::read(MAGIC_NUMBER_ADDR);
+    PRINTLN_VARIABLE_IF_DEBUG(magicNumber)
+    if (magicNumber != MAGIC_NUMBER) {
+        PRINTLN_IF_DEBUG("Magic number does not match initializing RTC")
         RTCMem<uint32_t>::write(MAGIC_NUMBER_ADDR, MAGIC_NUMBER);
-        setWakeupAmount(startWakeupCounter);
+        uint32_t check = RTCMem<uint32_t>::read(MAGIC_NUMBER_ADDR);
+        PRINTLN_IF_DEBUG("Checking to read RTC mem")
+        PRINTLN_VARIABLE_IF_DEBUG(check)
+        if (check != MAGIC_NUMBER) {
+            PRINTLN_IF_DEBUG("Fatal cannot write to RTCMem")
+        } else {
+            setWakeupAmount(startWakeupCounter);
+        }
     }
     _startType = RTCMem<uint32_t>::read(START_TYPE_ADDR);
     PRINTLN_VARIABLE_IF_DEBUG(_startType)
     RTCMem<uint32_t>::write(START_TYPE_ADDR, FAST_RESET);
+    PRINTLN_IF_DEBUG("Permanent active on next start, press reset to keep this mode")
 }
 
 
@@ -88,6 +97,7 @@ uint16_t RTC::getWakeupAmount() {
 void RTC::setWakeupAmount(uint16_t wakeupAmount) {
     RTCMem<uint16_t>::write(WAKEUP_COUNTER_ADDR, wakeupAmount);  
     RTCMem<uint32_t>::write(START_TYPE_ADDR, NORMAL_RESET);
+    PRINTLN_IF_DEBUG("Fast off (battery mode) on next start")
 }
 
 void RTC::incWakeupAmount() {
