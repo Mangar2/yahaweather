@@ -15,41 +15,22 @@
 #include <Arduino.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
-#include "message.h"
+#include <idevice.h>
 
-class YahaBME280
+class YahaBME280 : IDevice
 {
 public:
-    YahaBME280()
+    /**
+     * Initializes the bme sensor
+     * @param bmeWireAddress I2C address of the bme
+     * @param pin pin providing the Supply voltage for the sensor (power on pin). If it is zero
+     * then no pin is activated (bme is always supplied with power)
+     */
+    YahaBME280(uint16_t bmeWireAddress = 0x76, uint8_t pin = 0)
     {
+        activate(pin);
+        init(bmeWireAddress);
     }
-
-    /**
-     * Sets the base topic for the device. The base topic is the start of the topic
-     * sent to the mqtt broker
-     */
-    void setBaseTopic(String baseTopic) {
-        _baseTopic = baseTopic;
-    }
-
-    /**
-     * Activates the power supply of the BME
-     * Optional feature for very low power consuming sensor configuration
-     * @param pin Power pin for the sensor
-     */
-    void activate(uint8_t pin);
-
-
-    /**
-     * Initializes the bme
-     * @param bmeWireAddress I2C address of the Sensor
-     */
-    void init(uint16_t bmeWireAddress = 0x76);
-
-    /**
-     * Checks, if a bme sensor has been found
-     */
-    bool isBMEAvailable() { return _bmeAvailable; }
 
     /**
      * Reads the temperature
@@ -67,24 +48,26 @@ public:
     float readPressure();
 
     /**
-     * Creates a temperature message to publishh
-     */
-    Message getTemperatureMessage();
-
-    /**
-     * Creates a huidity message to publish
-     */
-    Message getHumidityMessage();
-
-    /**
-     * Creates a pressure message to publish
-     */
-     Message getPressureMessage();
-
-    /**
      * Gets all messages to publish
      */
-    Messages_t getMessages();
+    virtual Messages_t getMessages(const String& baseTopic);
+
+    /**
+     * Sets configuration from a key/value map, BME has no configuration to set
+     * @param config map containing the configuration
+     */
+    virtual void setConfig(jsonObject_t config) {};
+
+    /**
+     * Returns temperature, humidity, pressure as configuration map
+     * @returns configuration 
+     */
+    virtual jsonObject_t getConfig();
+
+    /**
+     * Checks, if a bme sensor has been found
+     */
+    virtual bool isValid() { return _bmeAvailable; };
 
     /**
      * Scans the I2CBus and prints addresses of found I2C devices
@@ -92,8 +75,22 @@ public:
     void ScanI2CBus();
 
 private:
+
+    /**
+     * Initializes the bme
+     * @param bmeWireAddress I2C address of the Sensor
+     */
+    void init(uint16_t bmeWireAddress = 0x76);
+
+    /**
+     * Activates the power supply of the BME
+     * Optional feature for very low power consuming sensor configuration
+     * @param pin Power pin for the sensor
+     */
+    void activate(uint8_t pin);
+
+
     Adafruit_BME280 bme; // I2C
-    String _baseTopic;
     bool _bmeAvailable;
 };
 

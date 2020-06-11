@@ -16,8 +16,10 @@
 
 void YahaBME280::activate(uint8_t pin)
 {
-    pinMode(pin, OUTPUT);
-    digitalWrite(pin, HIGH);
+    if (pin != 0) {
+        pinMode(pin, OUTPUT);
+        digitalWrite(pin, HIGH);
+    }
 }
 
 void YahaBME280::init(uint16_t bmeWireAddress)
@@ -51,42 +53,23 @@ float YahaBME280::readPressure()
     return bme.readPressure();
 }
 
-Message YahaBME280::getTemperatureMessage()
-{
-    const Message temperatureMessage(
-        _baseTopic + "/temperature",
-        String(readTemperature()),
-        "send by yaha weather station");
-
-    return temperatureMessage;
+jsonObject_t YahaBME280::getConfig() {
+    jsonObject_t result;
+    result["temperature"] = String(bme.readTemperature());
+    result["humidity"] = String(bme.readHumidity());
+    result["pressure"] = String(bme.readPressure());
+    return result;
 }
 
-Message YahaBME280::getHumidityMessage()
-{
-    const Message humidityMessage(
-        _baseTopic + "/humidity",
-        String(readHumidity()),
-        "send by yaha weather station");
-
-    return humidityMessage;
-}
-
-Message YahaBME280::getPressureMessage()
-{
-    const Message pressureMessage(
-        _baseTopic + "/pressure", 
-        String(readPressure()), 
-        "send by yaha weather station");
-
-    return pressureMessage;
-}
-
-Messages_t YahaBME280::getMessages() {
+Messages_t YahaBME280::getMessages(const String& baseTopic) {
     Messages_t result;
-    if (isBMEAvailable()) {
-        result.push_back(getTemperatureMessage());
-        result.push_back(getHumidityMessage());
-        result.push_back(getPressureMessage());
+    if (isValid()) {
+        const Message pressureMessage(baseTopic + "/pressure", String(readPressure()), "send by ESP8266");
+        const Message humidityMessage(baseTopic + "/humidity", String(readHumidity()), "send by ESP8266");
+        const Message temperatureMessage(baseTopic + "/temperature", String(readTemperature()), "send by ESP8266");
+        result.push_back(temperatureMessage);
+        result.push_back(humidityMessage);
+        result.push_back(pressureMessage);
     }
     return result;
 }

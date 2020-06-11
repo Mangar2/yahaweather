@@ -16,7 +16,11 @@
 
 #include <yahaserver.h>
 #include <debug.h>
-#include <message.h>
+#include <vector>
+#include <idevice.h>
+
+std::vector<IDevice*> yahaDevices;
+yahaDevices.pushback(&bme);
 
 #ifdef __IRRIGATION
 #include <irrigation.h>
@@ -26,10 +30,12 @@ Irrigation irrigation;
 #ifdef __BME
 #include <yahabme280.h>
 #include "htmlweatherform.h"
-YahaBME280 bme;
+const uint16_t BME_I2C_ADDRESS = 0x76;
+const uint8_t ACTIVATE_BME280_PIN = 14;
+YahaBME280 bme(BME_I2C_ADDRESS, ACTIVATE_BME280_PIN);
+//yahaDevices.pushback(&bme);
 #endif
 
-const uint8_t ACTIVATE_BME280_PIN = 14;
 const uint32_t SERIAL_SPEED = 115200;
 const char* STATION_NAME = "YahaIrrigation";
 
@@ -44,9 +50,6 @@ void setup() {
     server.setup(STATION_NAME);
     #ifdef __BME
     MQTTServer::addForm("/", "Weather", htmlWeatherForm);
-    bme.activate(ACTIVATE_BME280_PIN);
-    bme.setBaseTopic(server.brokerProxy.getBaseTopic());
-    bme.init(0x76);
     #endif
     #ifdef __IRRIGATION
     MQTTServer::addForm("/irrigation", "Irrigation", irrigation.htmlForm);
@@ -62,17 +65,15 @@ void setup() {
  */
 void loop() {
     #ifdef __BME
-    float humidity = bme.readHumidity();
-    MQTTServer::setData("temperature", String(bme.readTemperature()));
-    MQTTServer::setData("humidity", String(bme.readHumidity()));
-    MQTTServer::setData("pressure", String(bme.readPressure()));
+    MQTTServer::setData(bme.getConfig());
     if (WLAN::isConnected()) {
-        server.brokerProxy.publishMessages(bme.getMessages());
+        server.brokerProxy.publishMessages(bme.getMessages(server.brokerProxy.getBaseTopic()));
     }
     #endif
 
     #ifdef __IRRIGATION
     if (WLAN::isConnected()) {
+         float humidity = bme.readHumidity();
          if (server.irrigation.doIrrigation(humidity, RTC::getWakeupAmount())) {
             server.brokerProxy.publishMessages(server.irrigation.getMessages(server.brokerProxy.getBaseTopic(), humidity));
             server.irrigation.runIrrigation(humidity);
