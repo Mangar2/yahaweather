@@ -6,24 +6,34 @@
  * @author Volker Böhm
  * @copyright Copyright (c) 2020 Volker Böhm
  * @brief
- * Yaha station, uncomment ONE of the includes to use the station type you need
+ * Yaha station
  */
 
 #define __DEBUG
+#define __IRRIGATION
+#define __BME
+#define __SWITCH
+
 #include <yahaserver.h>
-#include <yahabme280.h>
 #include <debug.h>
-#include <irrigation.h>
 #include <message.h>
+
+#ifdef __IRRIGATION
+#include <irrigation.h>
+Irrigation irrigation;
+#endif
+
+#ifdef __BME
+#include <yahabme280.h>
 #include "htmlweatherform.h"
+YahaBME280 bme;
+#endif
 
 const uint8_t ACTIVATE_BME280_PIN = 14;
 const uint32_t SERIAL_SPEED = 115200;
 const char* STATION_NAME = "YahaIrrigation";
 
-YahaBME280 bme;
 YahaServer server;
-Irrigation irrigation;
 
 
 /**
@@ -32,35 +42,44 @@ Irrigation irrigation;
 void setup() {
     INIT_SERIAL_IF_DEBUG(SERIAL_SPEED)
     server.setup(STATION_NAME);
+    #ifdef __BME
     MQTTServer::addForm("/", "Weather", htmlWeatherForm);
-    MQTTServer::addForm("/irrigation", "Irrigation", irrigation.htmlForm);
-    MQTTServer::addForm("/switch", "Switch", server.digitalSwitch.htmlForm);
-
     bme.activate(ACTIVATE_BME280_PIN);
     bme.setBaseTopic(server.brokerProxy.getBaseTopic());
-    bme.init(0x77);
+    bme.init(0x76);
+    #endif
+    #ifdef __IRRIGATION
+    MQTTServer::addForm("/irrigation", "Irrigation", irrigation.htmlForm);
+    #endif
+    #ifdef __SWITCH
+    MQTTServer::addForm("/switch", "Switch", server.digitalSwitch.htmlForm);
+    #endif
+
 }
 
 /**
  * main loop
  */
 void loop() {
+    #ifdef __BME
     float humidity = bme.readHumidity();
     MQTTServer::setData("temperature", String(bme.readTemperature()));
-    MQTTServer::setData("humidity", String(humidity));
+    MQTTServer::setData("humidity", String(bme.readHumidity()));
     MQTTServer::setData("pressure", String(bme.readPressure()));
-
     if (WLAN::isConnected()) {
         server.brokerProxy.publishMessages(bme.getMessages());
-        PRINTLN_VARIABLE_IF_DEBUG(RTC::getWakeupAmount());
-        Message wakeupAmount(server.brokerProxy.getBaseTopic() + "/wakeupAmount", String(RTC::getWakeupAmount()), String("send by ") + STATION_NAME);
-        server.brokerProxy.publishMessage(wakeupAmount);
-        if (server.irrigation.doIrrigation(humidity, RTC::getWakeupAmount())) {
+    }
+    #endif
+
+    #ifdef __IRRIGATION
+    if (WLAN::isConnected()) {
+         if (server.irrigation.doIrrigation(humidity, RTC::getWakeupAmount())) {
             server.brokerProxy.publishMessages(server.irrigation.getMessages(server.brokerProxy.getBaseTopic(), humidity));
             server.irrigation.runIrrigation(humidity);
             RTC::setWakeupAmount(0);
         }
     }
+    #endif
     server.loop();
 
     if (server.battery.isBatteryMode()) {

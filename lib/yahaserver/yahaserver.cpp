@@ -54,6 +54,10 @@ void YahaServer::closeDown() {
 void YahaServer::loop() {
     MQTTServer::setData("voltage", String(battery.measureVoltage()));
     if (WLAN::isConnected()) {
+        PRINTLN_VARIABLE_IF_DEBUG(RTC::getWakeupAmount());
+        Message wakeupAmount(brokerProxy.getBaseTopic() + "/wakeupAmount", String(RTC::getWakeupAmount()), String("send by ESP8266"));
+        brokerProxy.publishMessage(wakeupAmount);
+
         brokerProxy.publishMessages(battery.getMessages(brokerProxy.getBaseTopic()));
         if (MQTTServer::isChanged()) {
             brokerProxy.publishMessages(MQTTServer::getMessages(brokerProxy.getBaseTopic()));

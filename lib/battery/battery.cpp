@@ -41,7 +41,8 @@ void Battery::Configuration::set(std::map<String, String> config)
     normalVoltageSleepTimeInSeconds = config["normalVoltageSleepTimeInSeconds"].toFloat();
     highVoltage = config["highVoltage"].toFloat();
     lowVoltage = config["lowVoltage"].toFloat();
-    batteryMode = config["batteryMode"] == "on" ? 1 : 0;
+    uint8_t newBatteryMode = config["batteryMode"] == "on" ? 1 : 0;
+    batteryMode = newBatteryMode;
 }
 
 const char* Battery::htmlForm = 
