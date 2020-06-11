@@ -20,6 +20,7 @@
 #include <runtime.h>
 #include <battery.h>
 #include <irrigation.h>
+#include <switch.h>
 
 class YahaServer {
 public:
@@ -53,6 +54,7 @@ public:
     static Runtime runtime;
     static BrokerProxy brokerProxy;
     static Irrigation irrigation;
+    static Switch digitalSwitch;
 
 private:
 

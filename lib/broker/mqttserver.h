@@ -99,6 +99,11 @@ private:
     static String replaceFormValues(const String& form); 
 
     /**
+     * Creates a form
+     */
+    static String createForm(const String& uri);
+
+    /**
      * Creates the navigation menu
      * @param activeLink relative link of the currently active page
      */
@@ -107,6 +112,7 @@ private:
     static ESP8266WebServer* _httpServer;
     static TOnUpdateFunction _onUpdateFunction;
     static std::map<String, String> _data;
+    static std::map<String, String> _formNames;
     static std::map<String, String> _forms;
     static bool _isChanged;
 };

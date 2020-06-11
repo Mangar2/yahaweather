@@ -62,7 +62,8 @@ const char* Battery::htmlForm =
     <label for="normalTime">Low voltage sleep time in seconds</label>
     <input type="text" id="lowTime" name="lowVoltageSleepTimeInSeconds" [value]="lowVoltageSleepTimeInSeconds">
     <input type="hidden" name="batteryMode" display="hidden" value="off">
-    
+
+    <label for="batteryMode">Battery mode enabled</label>
     <div class="sw">
     <input type="checkbox" name="batteryMode" class="sw-checkbox" id="batteryMode" tabindex="0" [checked]="batteryMode">
     <label class="sw-label" for="batteryMode">

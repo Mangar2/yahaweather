@@ -14,7 +14,6 @@
 #include <yahabme280.h>
 #include <debug.h>
 #include <irrigation.h>
-#include <switch.h>
 #include <message.h>
 #include "htmlweatherform.h"
 
@@ -25,7 +24,6 @@ const char* STATION_NAME = "YahaIrrigation";
 YahaBME280 bme;
 YahaServer server;
 Irrigation irrigation;
-Switch digitalSwitch;
 
 
 /**
@@ -36,7 +34,7 @@ void setup() {
     server.setup(STATION_NAME);
     MQTTServer::addForm("/", "Weather", htmlWeatherForm);
     MQTTServer::addForm("/irrigation", "Irrigation", irrigation.htmlForm);
-    MQTTServer::addForm("/switch", "Switch", digitalSwitch.htmlForm);
+    MQTTServer::addForm("/switch", "Switch", server.digitalSwitch.htmlForm);
 
     bme.activate(ACTIVATE_BME280_PIN);
     bme.setBaseTopic(server.brokerProxy.getBaseTopic());

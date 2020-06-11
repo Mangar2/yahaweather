@@ -18,6 +18,7 @@ Battery YahaServer::battery;
 Runtime YahaServer::runtime;
 BrokerProxy YahaServer::brokerProxy;
 Irrigation YahaServer::irrigation;
+Switch YahaServer::digitalSwitch;
 
 
 void YahaServer::setup(const String stationSSID) {
@@ -70,6 +71,8 @@ void YahaServer::updateConfig(std::map<String, String> config) {
     _config.broker.set(config);
     _config.battery.set(config);
     _config.irrigation.set(config);
+    digitalSwitch.set(config);
+    MQTTServer::setData(digitalSwitch.get());
     brokerProxy.setConfiguration(_config.broker);
     battery.setConfiguration(_config.battery);
     irrigation.setConfiguration(_config.irrigation);
@@ -96,6 +99,7 @@ void YahaServer::setupEEPROM() {
     MQTTServer::setData(_config.broker.get());
     MQTTServer::setData(_config.wlan.get());
     MQTTServer::setData(_config.irrigation.get());
+    MQTTServer::setData(digitalSwitch.get());
     PRINTLN_IF_DEBUG("Setup EEPROM finished")
 }
 
