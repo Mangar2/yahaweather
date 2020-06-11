@@ -12,9 +12,9 @@
 #include "irrigation.h"
 
 Irrigation::Configuration::Configuration() {
-        lowIrrigationDurationInSeconds = 30;
+        lowIrrigationDurationInSeconds = 0;
         lowWakeupUntilIrrigation = 24;
-        highIrrigationDurationInSeconds = 30;
+        highIrrigationDurationInSeconds = 0;
         highWakeupUntilIrrigation = 24;
         pump2Factor = 1;
 }
@@ -61,6 +61,11 @@ const char* Irrigation::htmlForm =
     <input type="submit" value="Submit">
     </form>
     )htmlform";
+
+const char* swithPumpForm = 
+    R"htmlswitch(
+    
+    )htmlswitch";
 
 Irrigation::Irrigation(uint8_t pump1Pin, uint8_t pump2Pin)
  : _pump1Pin(pump1Pin), _pump2Pin(pump2Pin) {

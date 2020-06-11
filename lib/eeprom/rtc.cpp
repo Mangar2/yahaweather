@@ -97,7 +97,7 @@ uint16_t RTC::getWakeupAmount() {
 void RTC::setWakeupAmount(uint16_t wakeupAmount) {
     RTCMem<uint16_t>::write(WAKEUP_COUNTER_ADDR, wakeupAmount);  
     RTCMem<uint32_t>::write(START_TYPE_ADDR, NORMAL_RESET);
-    PRINTLN_IF_DEBUG("Fast off (battery mode) on next start")
+    PRINTLN_IF_DEBUG("Normal reset")
 }
 
 void RTC::incWakeupAmount() {

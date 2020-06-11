@@ -48,22 +48,21 @@ void loop() {
     MQTTServer::setData("temperature", String(bme.readTemperature()));
     MQTTServer::setData("humidity", String(humidity));
     MQTTServer::setData("pressure", String(bme.readPressure()));
+
     if (WLAN::isConnected()) {
         server.brokerProxy.publishMessages(bme.getMessages());
+        PRINTLN_VARIABLE_IF_DEBUG(RTC::getWakeupAmount());
+        Message wakeupAmount(server.brokerProxy.getBaseTopic() + "/wakeupAmount", String(RTC::getWakeupAmount()), String("send by ") + STATION_NAME);
+        server.brokerProxy.publishMessage(wakeupAmount);
+        if (server.irrigation.doIrrigation(humidity, RTC::getWakeupAmount())) {
+            server.brokerProxy.publishMessages(server.irrigation.getMessages(server.brokerProxy.getBaseTopic(), humidity));
+            server.irrigation.runIrrigation(humidity);
+            RTC::setWakeupAmount(0);
+        }
     }
     server.loop();
 
-    PRINTLN_VARIABLE_IF_DEBUG(RTC::getWakeupAmount());
-    Message wakeupAmount(server.brokerProxy.getBaseTopic() + "/wakeupAmount", String(RTC::getWakeupAmount()), String("send by ") + STATION_NAME);
-    server.brokerProxy.publishMessage(wakeupAmount);
-    if (server.irrigation.doIrrigation(humidity, RTC::getWakeupAmount())) {
-        server.brokerProxy.publishMessages(server.irrigation.getMessages(server.brokerProxy.getBaseTopic(), humidity));
-        server.brokerProxy.publishMessages(MQTTServer::getMessages(server.brokerProxy.getBaseTopic()));
-        server.irrigation.runIrrigation(humidity);
-        RTC::setWakeupAmount(0);
-    }
-
-    if (!RTC::isFastReset()) {
+    if (server.battery.isBatteryMode() && !RTC::isFastReset()) {
         server.closeDown();
     } else {
         for (uint16_t i = 0; i < 5000; i++) {

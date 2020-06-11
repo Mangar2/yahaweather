@@ -23,6 +23,7 @@ public:
         uint16_t normalVoltageSleepTimeInSeconds;
         uint16_t highVoltageSleepTimeInSeconds;
         uint16_t lowVoltageSleepTimeInSeconds;
+        uint8_t batteryMode;
         float voltageCalibrationDivisor;
         float highVoltage;
         float lowVoltage;
@@ -69,6 +70,21 @@ public:
     bool isHighVoltage()
     {
         return measureVoltage() >= _configuration.highVoltage;
+    }
+
+    /**
+     * @returns true, if battery mode is activated
+     */
+    bool isBatteryMode() {
+        return _configuration.batteryMode == 1;
+    }
+
+    
+    /**
+     * @returns true, if battery mode is activated
+     */
+    void setBatteryMode(bool mode) {
+        _configuration.batteryMode = mode ? 1 : 0;
     }
 
     /**

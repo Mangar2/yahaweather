@@ -9,6 +9,7 @@
  * Provides a web server waiting for yaha mqtt commands
  */
 
+#define __DEBUG
 #include "debug.h"
 #include "mqttserver.h"
 #include "htmlpages.h"
@@ -17,6 +18,7 @@ ESP8266WebServer* MQTTServer::_httpServer = 0;
 TOnUpdateFunction MQTTServer::_onUpdateFunction = 0;
 std::map<String, String> MQTTServer::_data;
 std::map<String, String> MQTTServer::_forms;
+bool MQTTServer::_isChanged;
     
 void MQTTServer::onPublish() {
     String postBody = _httpServer->arg("plain");
@@ -31,6 +33,7 @@ void MQTTServer::onPublish() {
     setData(propertyName, value);
     _onUpdateFunction(_data);
     String id = _httpServer->header("id");
+    _isChanged = true;
     PRINTLN_VARIABLE_IF_DEBUG(id)
 
     _httpServer->sendHeader("id", id);
@@ -42,8 +45,10 @@ void MQTTServer::onPublish() {
 String MQTTServer::replaceFormValues(const String& form) {
     String result = form;
     for (auto const& x: _data) {
-        String searchString = "[value]=\"" + x.first + "\"";
-        result.replace(searchString, "value=\"" + x.second + "\"");
+        String valueString = "[value]=\"" + x.first + "\"";
+        String checkedString = "[checked]=\"" + x.first + "\"";
+        result.replace(valueString, "value=\"" + x.second + "\"");
+        result.replace(checkedString, x.second == "on" ? "checked=\"checked\"" : "");
     }
     return result;
 }
@@ -69,7 +74,11 @@ void MQTTServer::on(const String& uri) {
     THandlerFunction handler = []() { _onUpdateFunction(_data); };
     _httpServer->on(uri, HTTP_POST, [uri, handler]() {
         PRINTLN_VARIABLE_IF_DEBUG(uri)
+        _isChanged = true;
         for (uint16_t i = 0; i < _httpServer->args(); i++) {
+            PRINT_VARIABLE_IF_DEBUG(_httpServer->argName(i))
+            PRINT_IF_DEBUG(" = ")
+            PRINTLN_VARIABLE_IF_DEBUG(_httpServer->arg(i))
             _data[_httpServer->argName(i)] = _httpServer->arg(i);
         }
         handler();

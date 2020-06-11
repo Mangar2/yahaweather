@@ -17,6 +17,7 @@ Battery::Configuration::Configuration() {
     voltageCalibrationDivisor = 24;
     highVoltage = 3.5;
     lowVoltage = 3.1;
+    batteryMode = 0;
 }
 
 std::map<String, String> Battery::Configuration::get()
@@ -28,6 +29,7 @@ std::map<String, String> Battery::Configuration::get()
     result["normalVoltageSleepTimeInSeconds"] = normalVoltageSleepTimeInSeconds;
     result["highVoltage"] = highVoltage;
     result["lowVoltage"] = lowVoltage;
+    result["batteryMode"] = batteryMode ? "on" : "";
     return result;
 }
 
@@ -39,6 +41,7 @@ void Battery::Configuration::set(std::map<String, String> config)
     normalVoltageSleepTimeInSeconds = config["normalVoltageSleepTimeInSeconds"].toFloat();
     highVoltage = config["highVoltage"].toFloat();
     lowVoltage = config["lowVoltage"].toFloat();
+    batteryMode = config["batteryMode"] == "on" ? 1 : 0;
 }
 
 const char* Battery::htmlForm = 
@@ -58,6 +61,16 @@ const char* Battery::htmlForm =
     <input type="text" id="normalTime" name="normalVoltageSleepTimeInSeconds" [value]="normalVoltageSleepTimeInSeconds">
     <label for="normalTime">Low voltage sleep time in seconds</label>
     <input type="text" id="lowTime" name="lowVoltageSleepTimeInSeconds" [value]="lowVoltageSleepTimeInSeconds">
+    <input type="hidden" name="batteryMode" display="hidden" value="off">
+    
+    <div class="sw">
+    <input type="checkbox" name="batteryMode" class="sw-checkbox" id="batteryMode" tabindex="0" [checked]="batteryMode">
+    <label class="sw-label" for="batteryMode">
+        <span class="sw-inner"></span>
+        <span class="sw-switch"></span>
+    </label>
+    </div>
+
     <input type="submit" value="Submit">
     </form>
     )htmlform";

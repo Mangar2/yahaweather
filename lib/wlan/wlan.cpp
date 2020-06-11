@@ -9,6 +9,7 @@
  * Provides a class to connect to WLAN
  */
 
+#define __DEBUG
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
 #include "wlan.h"

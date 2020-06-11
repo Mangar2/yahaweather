@@ -28,7 +28,9 @@ void YahaServer::setup(const String stationSSID) {
     WLAN::connect(_config.wlan, stationSSID);
     brokerProxy.connect();
     RTC::incWakeupAmount();
-
+    if (RTC::isFastReset()) {
+        battery.setBatteryMode(false);
+    }
     MQTTServer::addForm("/battery", "Battery", Battery::htmlForm);
     MQTTServer::addForm("/wlan", "Wlan", WLAN::htmlForm);
     PRINTLN_VARIABLE_IF_DEBUG(system_get_free_heap_size())
@@ -52,7 +54,10 @@ void YahaServer::loop() {
     MQTTServer::setData("voltage", String(battery.measureVoltage()));
     if (WLAN::isConnected()) {
         brokerProxy.publishMessages(battery.getMessages(brokerProxy.getBaseTopic()));
-        for (uint16_t i = 0; i < 5; i++) {
+        if (MQTTServer::isChanged()) {
+            brokerProxy.publishMessages(MQTTServer::getMessages(brokerProxy.getBaseTopic()));
+        }
+        for (uint16_t i = 0; i < 30; i++) {
             MQTTServer::handleClient();
             delay(10);
         }

@@ -73,6 +73,11 @@ public:
      */
     static Messages_t getMessages(const String& baseTopic);
 
+    /**
+     * Returns true, if settings has been changed
+     */
+    static bool isChanged() { return _isChanged; }
+
 private:
     MQTTServer() {
     }
@@ -103,4 +108,5 @@ private:
     static TOnUpdateFunction _onUpdateFunction;
     static std::map<String, String> _data;
     static std::map<String, String> _forms;
+    static bool _isChanged;
 };
