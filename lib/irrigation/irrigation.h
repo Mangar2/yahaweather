@@ -13,8 +13,9 @@
 #include <Arduino.h>
 #include <message.h>
 #include <map>
+#include <idevice.h>
 
-class Irrigation
+class Irrigation : public IDevice
 {
 public:
     struct Configuration
@@ -46,22 +47,40 @@ public:
     Irrigation(uint8_t pump1Pin = D6, uint8_t pump2Pin = D7); 
 
     /**
-     * Sets the battery config
+     * Sets configuration from a key/value map
+     * @param config map containing the configuration
      */
-    void setConfiguration(const Configuration &config) { _config = config; }
+    virtual void setConfig(jsonObject_t config) { _config.set(config); };
+    
+    /**
+     * Gets configuration as key/value map
+     * @returns configuration 
+     */
+    virtual jsonObject_t getConfig() { return _config.get(); };
 
     /**
-     * Gets the battery configuraiton
+     * @returns true, if the device is initialized and working
      */
-    Configuration& getConfiguration() { return _config; }
-
+    virtual bool isValid() const { return true; };
 
     /**
-     * @param humidity currend measured humidity in percent
+     * Gets messages to send
+     * @param baseTopic start topic to be used to create the message topic
+     * @returns a list of messages to send with topic, value and reason
+     */
+    virtual Messages_t getMessages(const String& baseTopic);
+
+    /**
+     * Sets the current humidity
+     * @param humidity current humidity
+     */
+    void setHumidity(float humidity) { _humidity = humidity; }
+
+    /**
      * @param pumpNo number of the pump to switch (either 1 or 2)
      * @returns the time for irrigation in seconds
      */
-    uint16_t getIrrigationDurationInSeconds(float humidity, uint8_t pumpNo);
+    uint16_t getIrrigationDurationInSeconds(uint8_t pumpNo);
 
     /**
      * Checks, if irrigation should be done
@@ -69,18 +88,13 @@ public:
      * @param wakeupAmount amount of wakeups since last irrigation
      * @returns true, if irrigation should be done
      */
-    bool doIrrigation(float humidity, uint16_t wakeupAmount);
+    bool doIrrigation(uint16_t wakeupAmount);
 
-    /**
-     * @param humidity currend measured humidity in percent
-     * Gets a yaha messages to send the battery voltage
-     */
-    Messages_t getMessages(const String &baseTopic, float humidity);
 
     /**
      * @param humidity currend measured humidity in percent
      */
-    void runIrrigation(float humidity);
+    void runIrrigation();
 
     static const char* htmlForm;
 
@@ -88,4 +102,5 @@ private:
     Configuration _config;
     uint8_t _pump1Pin;
     uint8_t _pump2Pin;
+    float _humidity;
 };

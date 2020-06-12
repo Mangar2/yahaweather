@@ -21,6 +21,7 @@
 #include <battery.h>
 #include <irrigation.h>
 #include <switch.h>
+#include <idevice.h>
 
 class YahaServer {
 public:
@@ -39,6 +40,10 @@ public:
      * loop action
      */
     void loop();
+
+    void addDevice(IDevice* device) {
+        _devices.push_back(device);
+    }
 
     /**
      * Updates the configuration, stores it to eeprom
@@ -68,5 +73,7 @@ private:
     static Configuration _config;
 
     static const uint16_t EEPROM_START_ADDR = 0;
+
+    std::vector<IDevice*> _devices;
 
 };

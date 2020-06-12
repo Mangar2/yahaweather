@@ -14,11 +14,11 @@
 #include "debug.h"
 
 YahaServer::Configuration YahaServer::_config;
-Battery YahaServer::battery;
 Runtime YahaServer::runtime;
 BrokerProxy YahaServer::brokerProxy;
 Irrigation YahaServer::irrigation;
 Switch YahaServer::digitalSwitch;
+Battery YahaServer::battery;
 
 
 void YahaServer::setup(const String stationSSID) {
@@ -32,6 +32,7 @@ void YahaServer::setup(const String stationSSID) {
     if (RTC::isFastReset()) {
         battery.setBatteryMode(false);
     }
+    addDevice(&battery);
     MQTTServer::addForm("/battery", "Battery", Battery::htmlForm);
     MQTTServer::addForm("/wlan", "Wlan", WLAN::htmlForm);
     PRINTLN_VARIABLE_IF_DEBUG(system_get_free_heap_size())
@@ -52,13 +53,19 @@ void YahaServer::closeDown() {
 }
 
 void YahaServer::loop() {
-    MQTTServer::setData("voltage", String(battery.measureVoltage()));
+
+    for (auto const& device: _devices) {
+        MQTTServer::setData(device->getConfig());
+    }
+    if (WLAN::isConnected()) {
+        for(auto const& device: _devices) {
+            brokerProxy.publishMessages(device->getMessages(brokerProxy.getBaseTopic()));
+        }
+    }
     if (WLAN::isConnected()) {
         PRINTLN_VARIABLE_IF_DEBUG(RTC::getWakeupAmount());
         Message wakeupAmount(brokerProxy.getBaseTopic() + "/wakeupAmount", String(RTC::getWakeupAmount()), String("send by ESP8266"));
         brokerProxy.publishMessage(wakeupAmount);
-
-        brokerProxy.publishMessages(battery.getMessages(brokerProxy.getBaseTopic()));
         if (MQTTServer::isChanged()) {
             brokerProxy.publishMessages(MQTTServer::getMessages(brokerProxy.getBaseTopic()));
         }
@@ -78,8 +85,8 @@ void YahaServer::updateConfig(std::map<String, String> config) {
     digitalSwitch.set(config);
     MQTTServer::setData(digitalSwitch.get());
     brokerProxy.setConfiguration(_config.broker);
-    battery.setConfiguration(_config.battery);
-    irrigation.setConfiguration(_config.irrigation);
+    battery.setConfig(config);
+    irrigation.setConfig(config);
     EEPROMAccess::write(EEPROM_START_ADDR, (uint8_t*) &_config, sizeof(_config));
     EEPROMAccess::commit();
     PRINTLN_IF_DEBUG("Configuration committed")
@@ -90,16 +97,16 @@ void YahaServer::setupEEPROM() {
     EEPROMAccess::init();
     EEPROMAccess::read(EEPROM_START_ADDR, (uint8_t*) &_config, sizeof(_config));
     if (_config.wlan.isInitialized()) {
-        battery.setConfiguration(_config.battery);
+        battery.setConfig(_config.battery.get());
         brokerProxy.setConfiguration(_config.broker);
-        irrigation.setConfiguration(_config.irrigation);
+        irrigation.setConfig(_config.irrigation.get());
     } else {
         _config.wlan.clear();
-        _config.battery = battery.getConfiguration();
+        _config.battery.set(battery.getConfig());
         _config.broker = brokerProxy.getConfiguration();
-        _config.irrigation = irrigation.getConfiguration();
+        _config.irrigation.set(irrigation.getConfig());
     }
-    MQTTServer::setData(_config.battery.get());
+    MQTTServer::setData(battery.getConfig());
     MQTTServer::setData(_config.broker.get());
     MQTTServer::setData(_config.wlan.get());
     MQTTServer::setData(_config.irrigation.get());

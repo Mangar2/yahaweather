@@ -17,7 +17,7 @@
 #include <Adafruit_BME280.h>
 #include <idevice.h>
 
-class YahaBME280 : IDevice
+class YahaBME280 : public IDevice
 {
 public:
     /**
@@ -67,7 +67,7 @@ public:
     /**
      * Checks, if a bme sensor has been found
      */
-    virtual bool isValid() { return _bmeAvailable; };
+    virtual bool isValid() const { return _bmeAvailable; };
 
     /**
      * Scans the I2CBus and prints addresses of found I2C devices

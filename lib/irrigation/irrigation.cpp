@@ -81,38 +81,38 @@ Irrigation::Irrigation(uint8_t pump1Pin, uint8_t pump2Pin)
     PRINTLN_IF_DEBUG("test low")
 };
 
-Messages_t Irrigation::getMessages(const String& baseTopic, float humidity) {
+Messages_t Irrigation::getMessages(const String& baseTopic) {
 
     std::vector<Message> result;
     result.push_back(Message(
         baseTopic + "/irrigation/pump1",
-        String(getIrrigationDurationInSeconds(humidity, 1)),
+        String(getIrrigationDurationInSeconds(1)),
         "send by yaha ESP8266 module"
     ));
     result.push_back(Message(
         baseTopic + "/irrigation/pump2",
-        String(getIrrigationDurationInSeconds(humidity, 2)),
+        String(getIrrigationDurationInSeconds(2)),
         "send by yaha ESP8266 module"
     ));
 
     return result;
 }
 
-uint16_t Irrigation::getIrrigationDurationInSeconds(float humidity, uint8_t pumpNo) {
+uint16_t Irrigation::getIrrigationDurationInSeconds(uint8_t pumpNo) {
     float humidityDifference = 60 - 30;
     float irrigationDifference = _config.highIrrigationDurationInSeconds - _config.lowIrrigationDurationInSeconds;
     float relativeIrrigation = irrigationDifference / humidityDifference;
-    uint16_t duration = (humidity - 30) * relativeIrrigation + _config.lowIrrigationDurationInSeconds;
+    uint16_t duration = (_humidity - 30) * relativeIrrigation + _config.lowIrrigationDurationInSeconds;
     if (pumpNo == 2) {
         duration *= _config.pump2Factor;
     }
     return duration;
 }
 
-void Irrigation::runIrrigation(float humidity) {
+void Irrigation::runIrrigation() {
     const uint32_t MILLISECONDS_IN_A_SECOND = 1000;
     for (int pumpNo = 1; pumpNo <= 2; pumpNo++) {
-        const uint16_t timeInSeconds = getIrrigationDurationInSeconds(humidity, pumpNo);
+        const uint16_t timeInSeconds = getIrrigationDurationInSeconds(pumpNo);
         const uint8_t pumpPin = pumpNo == 1 ? _pump1Pin : _pump2Pin;
         PRINT_IF_DEBUG("Pump ");
         PRINT_IF_DEBUG(pumpNo)
@@ -131,10 +131,10 @@ void Irrigation::runIrrigation(float humidity) {
     }
 }
 
-bool Irrigation::doIrrigation(float humidity, uint16_t wakeupAmount) {
+bool Irrigation::doIrrigation(uint16_t wakeupAmount) {
     float humidityDifference = 60 - 30;
     float wakeupDifference = _config.highWakeupUntilIrrigation - _config.lowWakeupUntilIrrigation;
     float relativeWakeup = wakeupDifference / humidityDifference;
-    uint16_t neededWakeupAmount = (humidity - 30) * relativeWakeup + _config.lowWakeupUntilIrrigation;
+    uint16_t neededWakeupAmount = (_humidity - 30) * relativeWakeup + _config.lowWakeupUntilIrrigation;
     return wakeupAmount >= neededWakeupAmount;
 }

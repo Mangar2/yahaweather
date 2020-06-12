@@ -38,6 +38,6 @@ public:
     /**
      * @returns true, if the device is initialized and working
      */
-    virtual bool isValid() = 0;
+    virtual bool isValid() const = 0;
 
 };

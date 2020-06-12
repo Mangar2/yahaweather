@@ -13,8 +13,9 @@
 #include <Arduino.h>
 #include <message.h>
 #include <map>
+#include <idevice.h>
 
-class Battery
+class Battery : public IDevice
 {
 public:
     struct Configuration
@@ -40,28 +41,32 @@ public:
         void set(std::map<String, String> config);
     };
     Battery(){};
-    Battery(const Configuration &configuration) : _configuration(configuration) {}
 
     /**
      * Sets the battery configuration
      */
-    void setConfiguration(const Configuration &configuration) { _configuration = configuration; }
+    virtual void setConfig(jsonObject_t config) { _config.set(config); }
 
     /**
      * Gets the battery configuraiton
      */
-    Configuration& getConfiguration() { return _configuration; }
+    virtual jsonObject_t getConfig() { 
+        auto result = _config.get();
+        result["voltage"] = String(measureVoltage());
+        return result; 
+    }
 
     /**
      * Measures battery voltage
      */
     float measureVoltage();
+
     /**
      * @returns true, if the battery voltage is low
      */
     bool isLowVoltage()
     {
-        return measureVoltage() < _configuration.lowVoltage;
+        return measureVoltage() < _config.lowVoltage;
     }
 
     /**
@@ -69,14 +74,14 @@ public:
      */
     bool isHighVoltage()
     {
-        return measureVoltage() >= _configuration.highVoltage;
+        return measureVoltage() >= _config.highVoltage;
     }
 
     /**
      * @returns true, if battery mode is activated
      */
     bool isBatteryMode() {
-        return _configuration.batteryMode == 1;
+        return _config.batteryMode == 1;
     }
 
     
@@ -84,7 +89,7 @@ public:
      * @returns true, if battery mode is activated
      */
     void setBatteryMode(bool mode) {
-        _configuration.batteryMode = mode ? 1 : 0;
+        _config.batteryMode = mode ? 1 : 0;
     }
 
     /**
@@ -95,11 +100,16 @@ public:
     /**
      * Gets a yaha messages to send the battery voltage
      */
-    Messages_t getMessages(const String &baseTopic);
+    virtual Messages_t getMessages(const String &baseTopic);
+
+    /**
+     * Battery device is always valid
+     */
+    virtual bool isValid() const { return true; }
 
     static const char* htmlForm;
 
 private:
     static const uint8_t BATTERY_PIN = A0;
-    Configuration _configuration;
+    Configuration _config;
 };

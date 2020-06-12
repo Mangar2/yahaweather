@@ -92,18 +92,18 @@ Messages_t Battery::getMessages(const String& baseTopic) {
 
 uint16_t Battery::getSleepTimeInSeconds() {
     if (isLowVoltage()) {
-        return _configuration.lowVoltageSleepTimeInSeconds;
+        return _config.lowVoltageSleepTimeInSeconds;
     } else if (isHighVoltage()) {
-        return _configuration.highVoltageSleepTimeInSeconds;
+        return _config.highVoltageSleepTimeInSeconds;
     } else {
-        return _configuration.normalVoltageSleepTimeInSeconds;
+        return _config.normalVoltageSleepTimeInSeconds;
     }
 }
 
 float Battery::measureVoltage() {
-    float divisor = _configuration.voltageCalibrationDivisor == 0 ? 1 : _configuration.voltageCalibrationDivisor;
+    float divisor = _config.voltageCalibrationDivisor == 0 ? 1 : _config.voltageCalibrationDivisor;
     float batteryValue = analogRead(BATTERY_PIN) / divisor;
-    PRINTLN_VARIABLE_IF_DEBUG(_configuration.voltageCalibrationDivisor)
+    PRINTLN_VARIABLE_IF_DEBUG(_config.voltageCalibrationDivisor)
     PRINTLN_VARIABLE_IF_DEBUG(analogRead(BATTERY_PIN))
     return batteryValue;
 }

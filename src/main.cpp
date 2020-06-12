@@ -14,13 +14,9 @@
 #define __BME
 #define __SWITCH
 
-#include <yahaserver.h>
-#include <debug.h>
 #include <vector>
-#include <idevice.h>
-
-std::vector<IDevice*> yahaDevices;
-yahaDevices.pushback(&bme);
+#include <debug.h>
+#include <yahaserver.h>
 
 #ifdef __IRRIGATION
 #include <irrigation.h>
@@ -33,7 +29,6 @@ Irrigation irrigation;
 const uint16_t BME_I2C_ADDRESS = 0x76;
 const uint8_t ACTIVATE_BME280_PIN = 14;
 YahaBME280 bme(BME_I2C_ADDRESS, ACTIVATE_BME280_PIN);
-//yahaDevices.pushback(&bme);
 #endif
 
 const uint32_t SERIAL_SPEED = 115200;
@@ -49,6 +44,7 @@ void setup() {
     INIT_SERIAL_IF_DEBUG(SERIAL_SPEED)
     server.setup(STATION_NAME);
     #ifdef __BME
+    server.addDevice(&bme);
     MQTTServer::addForm("/", "Weather", htmlWeatherForm);
     #endif
     #ifdef __IRRIGATION
@@ -64,19 +60,13 @@ void setup() {
  * main loop
  */
 void loop() {
-    #ifdef __BME
-    MQTTServer::setData(bme.getConfig());
-    if (WLAN::isConnected()) {
-        server.brokerProxy.publishMessages(bme.getMessages(server.brokerProxy.getBaseTopic()));
-    }
-    #endif
 
     #ifdef __IRRIGATION
+    server.irrigation.setHumidity(bme.readHumidity());
     if (WLAN::isConnected()) {
-         float humidity = bme.readHumidity();
-         if (server.irrigation.doIrrigation(humidity, RTC::getWakeupAmount())) {
-            server.brokerProxy.publishMessages(server.irrigation.getMessages(server.brokerProxy.getBaseTopic(), humidity));
-            server.irrigation.runIrrigation(humidity);
+         if (server.irrigation.doIrrigation(RTC::getWakeupAmount())) {
+            server.brokerProxy.publishMessages(server.irrigation.getMessages(server.brokerProxy.getBaseTopic()));
+            server.irrigation.runIrrigation();
             RTC::setWakeupAmount(0);
         }
     }
