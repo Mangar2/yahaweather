@@ -98,6 +98,14 @@ Messages_t Irrigation::getMessages(const String& baseTopic) {
     return result;
 }
 
+void Irrigation::setConfig(jsonObject_t config) { 
+    _config.set(config); 
+    _humidity = config["humidity"].toFloat();
+    _wakeupAmount = config["rtc/wakeupAmount"].toFloat();
+    PRINT_IF_DEBUG("Irrigation set Config ")
+    PRINTLN_VARIABLE_IF_DEBUG(_wakeupAmount)
+};
+
 uint16_t Irrigation::getIrrigationDurationInSeconds(uint8_t pumpNo) {
     float humidityDifference = 60 - 30;
     float irrigationDifference = _config.highIrrigationDurationInSeconds - _config.lowIrrigationDurationInSeconds;
@@ -109,7 +117,7 @@ uint16_t Irrigation::getIrrigationDurationInSeconds(uint8_t pumpNo) {
     return duration;
 }
 
-void Irrigation::runIrrigation() {
+void Irrigation::run() {
     const uint32_t MILLISECONDS_IN_A_SECOND = 1000;
     for (int pumpNo = 1; pumpNo <= 2; pumpNo++) {
         const uint16_t timeInSeconds = getIrrigationDurationInSeconds(pumpNo);
@@ -131,10 +139,12 @@ void Irrigation::runIrrigation() {
     }
 }
 
-bool Irrigation::doIrrigation(uint16_t wakeupAmount) {
+bool Irrigation::doIrrigation() {
     float humidityDifference = 60 - 30;
     float wakeupDifference = _config.highWakeupUntilIrrigation - _config.lowWakeupUntilIrrigation;
     float relativeWakeup = wakeupDifference / humidityDifference;
     uint16_t neededWakeupAmount = (_humidity - 30) * relativeWakeup + _config.lowWakeupUntilIrrigation;
-    return wakeupAmount >= neededWakeupAmount;
+    PRINTLN_VARIABLE_IF_DEBUG(_wakeupAmount)
+    PRINTLN_VARIABLE_IF_DEBUG(neededWakeupAmount)
+    return _wakeupAmount >= neededWakeupAmount;
 }

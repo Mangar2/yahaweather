@@ -50,7 +50,7 @@ public:
      * Sets configuration from a key/value map
      * @param config map containing the configuration
      */
-    virtual void setConfig(jsonObject_t config) { _config.set(config); };
+    virtual void setConfig(jsonObject_t config);
     
     /**
      * Gets configuration as key/value map
@@ -71,10 +71,19 @@ public:
     virtual Messages_t getMessages(const String& baseTopic);
 
     /**
-     * Sets the current humidity
-     * @param humidity current humidity
+     * Checks, if irrigation should be done
+     * @returns true, if irrigation should be done
      */
-    void setHumidity(float humidity) { _humidity = humidity; }
+    bool doIrrigation();
+
+    /**
+     * Runs the irrigation
+     */
+    virtual void run();
+
+    static const char* htmlForm;
+
+private:
 
     /**
      * @param pumpNo number of the pump to switch (either 1 or 2)
@@ -82,25 +91,9 @@ public:
      */
     uint16_t getIrrigationDurationInSeconds(uint8_t pumpNo);
 
-    /**
-     * Checks, if irrigation should be done
-     * @param humidity currend measured humidity in percent
-     * @param wakeupAmount amount of wakeups since last irrigation
-     * @returns true, if irrigation should be done
-     */
-    bool doIrrigation(uint16_t wakeupAmount);
-
-
-    /**
-     * @param humidity currend measured humidity in percent
-     */
-    void runIrrigation();
-
-    static const char* htmlForm;
-
-private:
     Configuration _config;
     uint8_t _pump1Pin;
     uint8_t _pump2Pin;
     float _humidity;
+    uint16_t _wakeupAmount;
 };

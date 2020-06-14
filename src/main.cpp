@@ -18,11 +18,6 @@
 #include <debug.h>
 #include <yahaserver.h>
 
-#ifdef __IRRIGATION
-#include <irrigation.h>
-Irrigation irrigation;
-#endif
-
 #ifdef __BME
 #include <yahabme280.h>
 #include "htmlweatherform.h"
@@ -48,7 +43,7 @@ void setup() {
     MQTTServer::addForm("/", "Weather", htmlWeatherForm);
     #endif
     #ifdef __IRRIGATION
-    MQTTServer::addForm("/irrigation", "Irrigation", irrigation.htmlForm);
+    MQTTServer::addForm("/irrigation", "Irrigation", server.irrigation.htmlForm);
     #endif
     #ifdef __SWITCH
     MQTTServer::addForm("/switch", "Switch", server.digitalSwitch.htmlForm);
@@ -62,23 +57,14 @@ void setup() {
 void loop() {
 
     #ifdef __IRRIGATION
-    server.irrigation.setHumidity(bme.readHumidity());
     if (WLAN::isConnected()) {
-         if (server.irrigation.doIrrigation(RTC::getWakeupAmount())) {
+         if (server.irrigation.doIrrigation()) {
             server.brokerProxy.publishMessages(server.irrigation.getMessages(server.brokerProxy.getBaseTopic()));
-            server.irrigation.runIrrigation();
-            RTC::setWakeupAmount(0);
+            server.irrigation.run();
+            server.sendMessageToDevices("rtc/wakeupAmount", "0");
         }
     }
     #endif
     server.loop();
 
-    if (server.battery.isBatteryMode()) {
-        server.closeDown();
-    } else {
-        for (uint16_t i = 0; i < 5000; i++) {
-            MQTTServer::handleClient();
-            delay(10);
-        }
-    }
 }

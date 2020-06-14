@@ -14,6 +14,7 @@
 #include <ESP8266WebServer.h>
 #include <map>
 #include <message.h>
+#include <htmlpageinfo.h>
 #include "json.h"
 
 typedef std::function<void(std::map<String, String>&)> TOnUpdateFunction;
@@ -41,11 +42,13 @@ public:
      * Sets data for forms
      */
     static void setData(const String& key, const String& value) { _data[key] = value; }
-    static void setData(std::map<String, String> configuration) { 
+    static void setData(jsonObject_t configuration) { 
         for (auto const& x: configuration) {
             _data[x.first] = x.second;
         }
     }
+
+    static jsonObject_t& getData() { return _data; }
 
     /**
      * Registers a function beeing called on http/https request
@@ -60,6 +63,11 @@ public:
      * @param form html form including surrounding container - div
      */
     static void addForm(const String& uri, const String& name, const String& form);
+    static void addForm(const HtmlPageInfo& pageInfo) { 
+        if (pageInfo.hasForm) {
+            addForm(pageInfo._uri, pageInfo._menuName, pageInfo._form); 
+        }
+    }
 
     /**
      * Gets a key/value store of all configuration data

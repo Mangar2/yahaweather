@@ -6,14 +6,11 @@
  * @author Volker Böhm
  * @copyright Copyright (c) 2020 Volker Böhm
  * @brief
- * Provides a class to connect to WLAN
+ * Provides a class to include the RTC Memory in the yaha device
  */
 #define __DEBUG
 #include "debug.h"
 #include "rtc.h"
-
-using namespace RTC;
-
 
 const uint32_t MAGIC_NUMBER = 0xAABBCCDD;
 const int16_t MAGIC_NUMBER_ADDR = 0;
@@ -21,11 +18,6 @@ const int16_t WAKEUP_COUNTER_ADDR = 1;
 const int16_t START_TYPE_ADDR = 2;
 const int16_t NORMAL_RESET = 0;
 const int16_t FAST_RESET = 1;
-
-/**
- * Type of start, either "NORMAL_REST" or "FAST_RESET"
- */
-uint16_t _startType;
 
 template <class T>
 class RTCMem {
@@ -42,6 +34,22 @@ public:
 
     static const uint16_t RTC_USER_DATA_ADDR = 65;
 };
+
+/**
+ * Gets configuration as key/value map
+ * @returns configuration 
+ */
+void RTC::setup() {
+    sendMessageToDevices("rtc/wakeupAmount", String(getWakeupAmount()));
+    sendMessageToDevices("rtc/startType", isFastReset() ? "fastRest" : "normal");
+}
+    
+Messages_t RTC::getMessages(const String& baseTopic) {
+    const Message wakeupMessage(baseTopic + "/rtc/wakeupAmount", String(getWakeupAmount()), "send by yaha ESP8266");
+    std::vector<Message> result;
+    result.push_back(wakeupMessage);
+    return result;
+}
 
 bool RTC::isFastReset() {
     return _startType == FAST_RESET;
@@ -95,9 +103,11 @@ uint16_t RTC::getWakeupAmount() {
 }
 
 void RTC::setWakeupAmount(uint16_t wakeupAmount) {
-    RTCMem<uint16_t>::write(WAKEUP_COUNTER_ADDR, wakeupAmount);  
-    RTCMem<uint32_t>::write(START_TYPE_ADDR, NORMAL_RESET);
-    PRINTLN_IF_DEBUG("Normal reset")
+    if (wakeupAmount != getWakeupAmount()) {
+        RTCMem<uint16_t>::write(WAKEUP_COUNTER_ADDR, wakeupAmount);  
+        RTCMem<uint32_t>::write(START_TYPE_ADDR, NORMAL_RESET);
+        PRINTLN_IF_DEBUG("Normal reset")
+    }
 }
 
 void RTC::incWakeupAmount() {

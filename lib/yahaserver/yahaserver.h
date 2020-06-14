@@ -12,19 +12,21 @@
 #pragma once
 
 #include <Arduino.h>
+#include <imessagebroker.h>
+#include <idevice.h>
 #include <wlan.h>
 #include <brokerproxy.h>
 #include <mqttserver.h>
 #include <eepromaccess.h>
-#include <rtc.h>
 #include <runtime.h>
 #include <battery.h>
 #include <irrigation.h>
 #include <switch.h>
-#include <idevice.h>
 
-class YahaServer {
+class YahaServer : public IMessageBroker {
 public:
+    YahaServer() : _isBatteryMode(true) {}
+
     /**
      * Setup everything
      * @param stationSSID name of the station set up, if WLAN connection is not possible
@@ -42,6 +44,7 @@ public:
     void loop();
 
     void addDevice(IDevice* device) {
+        device->setMessageBroker(this);
         _devices.push_back(device);
     }
 
@@ -55,7 +58,13 @@ public:
      */
     static void setupEEPROM();
 
-    static Battery battery;
+    /**
+     * Sends a key/value message to all registered devices
+     * @param key indetifier of the message
+     * @param value value of the message
+     */
+    virtual void sendMessageToDevices(const String& key, const String& value);
+
     static Runtime runtime;
     static BrokerProxy brokerProxy;
     static Irrigation irrigation;
@@ -71,9 +80,10 @@ private:
     };
 
     static Configuration _config;
-
     static const uint16_t EEPROM_START_ADDR = 0;
+    static std::vector<IDevice*> _devices;
 
-    std::vector<IDevice*> _devices;
+    bool _isBatteryMode;
+    uint16_t _sleepTimeInSeconds;
 
 };

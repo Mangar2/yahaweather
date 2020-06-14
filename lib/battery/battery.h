@@ -45,15 +45,68 @@ public:
     /**
      * Sets the battery configuration
      */
-    virtual void setConfig(jsonObject_t config) { _config.set(config); }
+    virtual void setConfig(jsonObject_t config) { 
+        _config.set(config); 
+        setBatteryMode(_config.batteryMode);
+    }
+
+    /**
+     * Sets battery mode on fast reset
+     * @param config all relevant data
+     */
+    virtual void handleMessage(const String& key, const String& value) {
+        if (key == "rtc/startType" && value == "fastReset") { 
+            setBatteryMode(false);
+        }
+    }
 
     /**
      * Gets the battery configuraiton
      */
     virtual jsonObject_t getConfig() { 
-        auto result = _config.get();
-        result["voltage"] = String(measureVoltage());
-        return result; 
+        return _config.get();
+    }
+
+    /**
+     * Sends voltage measurement to all devices on setup
+     */
+    virtual void setup() {
+        run();
+    }
+
+    /**
+     * Sends voltage measurement to all devices on loop
+     */
+    virtual void run() {
+        sendMessageToDevices("battery/voltage", String(measureVoltage()));
+        sendMessageToDevices("battery/sleepTimeInSeconds", String(getSleepTimeInSeconds()));
+    }
+
+    /**
+     * @returns the sleep time in seconds depending on the battery voltage
+     */
+    uint16_t getSleepTimeInSeconds();
+
+    /**
+     * Gets a yaha messages to send the battery voltage
+     */
+    virtual Messages_t getMessages(const String &baseTopic);
+
+    /**
+     * Gets an info about the matching html page
+     */
+    virtual HtmlPageInfo getHtmlPage() { return HtmlPageInfo(htmlForm, "/battery", "Battery"); }
+
+private:
+
+    static const char* htmlForm;
+
+    /**
+     * @returns true, if battery mode is activated
+     */
+    void setBatteryMode(bool mode) {
+        _config.batteryMode = mode ? 1 : 0;
+        sendMessageToDevices("battery/mode", String(_config.batteryMode));
     }
 
     /**
@@ -77,39 +130,7 @@ public:
         return measureVoltage() >= _config.highVoltage;
     }
 
-    /**
-     * @returns true, if battery mode is activated
-     */
-    bool isBatteryMode() {
-        return _config.batteryMode == 1;
-    }
-
-    
-    /**
-     * @returns true, if battery mode is activated
-     */
-    void setBatteryMode(bool mode) {
-        _config.batteryMode = mode ? 1 : 0;
-    }
-
-    /**
-     * @returns the sleep time in seconds depending on the battery voltage
-     */
-    uint16_t getSleepTimeInSeconds();
-
-    /**
-     * Gets a yaha messages to send the battery voltage
-     */
-    virtual Messages_t getMessages(const String &baseTopic);
-
-    /**
-     * Battery device is always valid
-     */
-    virtual bool isValid() const { return true; }
-
-    static const char* htmlForm;
-
-private:
     static const uint8_t BATTERY_PIN = A0;
+
     Configuration _config;
 };

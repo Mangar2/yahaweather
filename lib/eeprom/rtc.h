@@ -11,13 +11,52 @@
 
 #pragma once
 
+#include <json.h>
+#include <message.h>
+#include <idevice.h>
+
 #ifdef ESP8266
 extern "C" {
 #include "user_interface.h"
 }
 #endif
 
-namespace RTC {
+class RTC : public IDevice {
+
+public:
+
+    RTC(uint16_t startWakeupCounter = 0) { 
+        initWakeupCounter(startWakeupCounter); 
+        incWakeupAmount();
+    }
+
+    /**
+     * Called on setup
+     */
+    virtual void setup();
+    
+    /**
+     * Gets messages to send
+     * @param baseTopic start topic to be used to create the message topic
+     * @returns a list of messages to send with topic, value and reason
+     */
+    virtual Messages_t getMessages(const String& baseTopic);
+
+    /**
+     * Runs in each loop
+     */
+    virtual void closedown() { incWakeupAmount(); }
+
+    /**
+     * Handles a message send to devices
+     * @param key message identifier
+     * @param value message value
+     */
+    virtual void handleDeviceMessage(const String& key, const String& value) {
+        if (key == "rtc/wakeupAmount") {
+            setWakeupAmount(value.toInt());
+        }
+    }
 
     /**
      * Gets the reason for a wakuep event
@@ -40,15 +79,16 @@ namespace RTC {
     uint32_t getRtcTime();
 
     /**
-     * Initializes the RTC memory entries and places a wakeup counter at the beginning
-     * @param startWakeupCounter start value for the wakeup counter
-     */
-    void initWakeupCounter(uint16_t startWakeupCounter = 0);
-
-    /**
      * Gets the amount of wakeups encountered
      */
     uint16_t getWakeupAmount();
+
+    /**
+     * Gets the fast reset amount read from RTC-Mem at the start
+     */
+    bool isFastReset();
+
+private:
 
     /**
      * Sets the amount of wakeup encountered
@@ -56,13 +96,19 @@ namespace RTC {
     void setWakeupAmount(uint16_t wakeupAmount);
 
     /**
+     * Initializes the RTC memory entries and places a wakeup counter at the beginning
+     * @param startWakeupCounter start value for the wakeup counter
+     */
+    void initWakeupCounter(uint16_t startWakeupCounter);
+
+    /**
      * Increase the amount of wakups encountered by one
      */
     void incWakeupAmount(); 
 
     /**
-     * Gets the fast reset amount read from RTC-Mem at the start
+     * Type of start, either "NORMAL_REST" or "FAST_RESET"
      */
-    bool isFastReset();
+    uint16_t _startType;
 
-}
+};
