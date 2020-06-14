@@ -53,16 +53,19 @@ public:
     virtual Messages_t getMessages(const String& baseTopic);
 
     /**
-     * Sets configuration from a key/value map, BME has no configuration to set
-     * @param config map containing the configuration
+     * Running first time on setup
      */
-    virtual void setConfig(jsonObject_t config) {};
+    virtual void setup() { run(); };
 
     /**
-     * Returns temperature, humidity, pressure as configuration map
-     * @returns configuration 
+     * Called on loop
      */
-    virtual jsonObject_t getConfig();
+    virtual void run();
+
+    /**
+     * Gets the weather information page
+     */
+    HtmlPageInfo getHtmlPage();
 
     /**
      * Checks, if a bme sensor has been found

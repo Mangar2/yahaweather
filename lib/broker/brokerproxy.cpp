@@ -38,7 +38,7 @@ std::map<String, String> BrokerProxy::Configuration::get()
     return result;
 }
 
-void BrokerProxy::Configuration::set(std::map<String, String> config)
+void BrokerProxy::Configuration::set(jsonObject_t& config)
 {
     brokerHost = config["brokerHost"];
     brokerPort = config["brokerPort"];

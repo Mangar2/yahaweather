@@ -40,7 +40,7 @@ public:
          * Sets the configuration from a key/value map
          * @param config configuration settings in a map
          */
-        void set(std::map<String, String> config);
+        void set(jsonObject_t& config);
     };
 
     BrokerProxy() {};
@@ -48,8 +48,8 @@ public:
     /**
      * Sets the configuration
      */
-    void setConfiguration(const Configuration& config) {
-        _config = config;
+    virtual void setConfig(jsonObject_t& config) {
+        _config.set(config);
     }
 
     /**

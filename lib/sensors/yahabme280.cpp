@@ -53,20 +53,37 @@ float YahaBME280::readPressure()
     return bme.readPressure();
 }
 
-jsonObject_t YahaBME280::getConfig() {
-    jsonObject_t result;
-    result["temperature"] = String(bme.readTemperature());
-    result["humidity"] = String(bme.readHumidity());
-    result["pressure"] = String(bme.readPressure());
-    return result;
+HtmlPageInfo YahaBME280::getHtmlPage() {
+    return HtmlPageInfo(
+        R"htmlweather(
+        <form>
+        <label for="temperature">Temperature</label>
+        <input type="text" id="temperature" readonly [value]="temperature">
+        <label for="humidity">Humidity</label>
+        <input type="text" id="humidity" readonly [value]="humidity">
+        <label for="pressure">Barometric pressure</label>
+        <input type="text" id="pressure" readonly [value]="pressure">
+        <label for="battery">Battery voltage</label>
+        <input type="text" id="voltage" readonly [value]="voltage">
+        </form>
+        )htmlweather",
+        "/",
+        "Weather"
+    );
+}
+
+void YahaBME280::run() {
+    sendMessageToDevices("temperature", String(bme.readTemperature()));
+    sendMessageToDevices("humidity", String(bme.readHumidity()));
+    sendMessageToDevices("pressure", String(bme.readPressure()));
 }
 
 Messages_t YahaBME280::getMessages(const String& baseTopic) {
     Messages_t result;
     if (isValid()) {
-        const Message pressureMessage(baseTopic + "/pressure", String(readPressure()), "send by ESP8266");
-        const Message humidityMessage(baseTopic + "/humidity", String(readHumidity()), "send by ESP8266");
-        const Message temperatureMessage(baseTopic + "/temperature", String(readTemperature()), "send by ESP8266");
+        const Message pressureMessage(baseTopic + "/bme280/pressure", String(readPressure()), "send by ESP8266");
+        const Message humidityMessage(baseTopic + "/bme280/humidity", String(readHumidity()), "send by ESP8266");
+        const Message temperatureMessage(baseTopic + "/bme280/temperature", String(readTemperature()), "send by ESP8266");
         result.push_back(temperatureMessage);
         result.push_back(humidityMessage);
         result.push_back(pressureMessage);

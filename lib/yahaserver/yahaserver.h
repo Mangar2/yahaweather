@@ -72,6 +72,10 @@ public:
 
 private:
 
+    static void setMQTTDataFromEEPROMConfig();
+    static void setEEPROMConfigFromJSON(jsonObject_t& config);
+    static void setDeviceConfigFromJSON(jsonObject_t& config);
+
     struct Configuration {
         BrokerProxy::Configuration broker;
         WLAN::Configuration wlan;

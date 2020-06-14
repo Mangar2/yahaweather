@@ -21,17 +21,11 @@ public:
     struct Configuration
     {
         Configuration();
-        uint16_t lowHumidity;
-        uint16_t lowIrrigationDurationInSeconds;
-        uint16_t lowWakeupUntilIrrigation;
-        uint16_t midIrrigationDurationInSeconds;
-        uint16_t midWakeupUntilIrrigation;
-        uint16_t highHumidity;
-        uint16_t highIrrigationDurationInSeconds;
-        uint16_t highWakeupUntilIrrigation;
+        uint16_t lowDurationInSeconds;
+        uint16_t lowWakeup;
+        uint16_t highDurationInSeconds;
+        uint16_t highWakeup;
         float pump2Factor;
-        uint8_t pump1Pin;
-        uint8_t pump2Pin;
 
         /**
          * Gets the config as key/value map
@@ -59,11 +53,6 @@ public:
     virtual jsonObject_t getConfig() { return _config.get(); };
 
     /**
-     * @returns true, if the device is initialized and working
-     */
-    virtual bool isValid() const { return true; };
-
-    /**
      * Gets messages to send
      * @param baseTopic start topic to be used to create the message topic
      * @returns a list of messages to send with topic, value and reason
@@ -75,6 +64,11 @@ public:
      * @returns true, if irrigation should be done
      */
     bool doIrrigation();
+
+    /**
+     * Called on setup of the irrigation
+     */
+    virtual void setup();
 
     /**
      * Runs the irrigation

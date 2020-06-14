@@ -68,7 +68,6 @@ void YahaServer::closeDown() {
 }
 
 void YahaServer::loop() {
-
     for (auto const& device: _devices) {
         device->run();
     }
@@ -95,43 +94,54 @@ void YahaServer::loop() {
     }
 }
 
-void YahaServer::updateConfig(std::map<String, String> config) {
-    PRINTLN_IF_DEBUG("update Configuration")
+void YahaServer::setMQTTDataFromEEPROMConfig() {
+    MQTTServer::setData(_config.battery.get());
+    MQTTServer::setData(_config.broker.get());
+    MQTTServer::setData(_config.irrigation.get());
+    MQTTServer::setData(_config.wlan.get());
+}
+
+void YahaServer::setEEPROMConfigFromJSON(jsonObject_t& config) {
     _config.wlan.set(config);
     _config.broker.set(config);
     _config.battery.set(config);
     _config.irrigation.set(config);
-    digitalSwitch.set(config);
-    MQTTServer::setData(digitalSwitch.get());
-    brokerProxy.setConfiguration(_config.broker);
-    battery.setConfig(config);
+}
+
+void YahaServer::setDeviceConfigFromJSON(jsonObject_t& config) {
+    for (auto const& device: _devices) {
+        device->setConfig(config);
+    }
+    brokerProxy.setConfig(config);
     irrigation.setConfig(config);
+    digitalSwitch.set(config);
+}
+
+void YahaServer::updateConfig(jsonObject_t config) {
+    PRINTLN_IF_DEBUG("update Configuration")
+    setEEPROMConfigFromJSON(config);
+    setDeviceConfigFromJSON(config);
+    
+    MQTTServer::setData(digitalSwitch.get());
     EEPROMAccess::write(EEPROM_START_ADDR, (uint8_t*) &_config, sizeof(_config));
     EEPROMAccess::commit();
     PRINTLN_IF_DEBUG("Configuration committed")
 }
 
 void YahaServer::setupEEPROM() {
+    // Initializes MQTT data from default values
+    setMQTTDataFromEEPROMConfig();
+
     PRINTLN_IF_DEBUG("Setup EEPROM")
     EEPROMAccess::init();
     EEPROMAccess::read(EEPROM_START_ADDR, (uint8_t*) &_config, sizeof(_config));
     if (_config.wlan.isInitialized()) {
-        battery.setConfig(_config.battery.get());
-        brokerProxy.setConfiguration(_config.broker);
-        irrigation.setConfig(_config.irrigation.get());
+        // Overwrite MQTT data from EEPROM values
+        setMQTTDataFromEEPROMConfig();
     } else {
         _config.wlan.clear();
-        _config.battery.set(battery.getConfig());
-        _config.broker = brokerProxy.getConfiguration();
-        _config.irrigation.set(irrigation.getConfig());
     }
-    for (auto const& device: _devices) {
-        MQTTServer::setData(device->getConfig());
-    }
-    MQTTServer::setData(_config.broker.get());
-    MQTTServer::setData(_config.wlan.get());
-    MQTTServer::setData(_config.irrigation.get());
-    MQTTServer::setData(digitalSwitch.get());
+    setDeviceConfigFromJSON(MQTTServer::getData());
     PRINTLN_IF_DEBUG("Setup EEPROM finished")
 }
 

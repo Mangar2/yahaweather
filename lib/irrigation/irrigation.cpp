@@ -12,31 +12,31 @@
 #include "irrigation.h"
 
 Irrigation::Configuration::Configuration() {
-        lowIrrigationDurationInSeconds = 0;
-        lowWakeupUntilIrrigation = 24;
-        highIrrigationDurationInSeconds = 0;
-        highWakeupUntilIrrigation = 24;
+        lowDurationInSeconds = 0;
+        lowWakeup = 24;
+        highDurationInSeconds = 0;
+        highWakeup = 24;
         pump2Factor = 1;
 }
 
 std::map<String, String> Irrigation::Configuration::get()
 {
     std::map<String, String> result;
-    result["lowIrrigationDurationInSeconds"] = lowIrrigationDurationInSeconds;
-    result["lowWakeupUntilIrrigation"] = lowWakeupUntilIrrigation;
-    result["highIrrigationDurationInSeconds"] = highIrrigationDurationInSeconds;
-    result["highWakeupUntilIrrigation"] = highWakeupUntilIrrigation;
-    result["pump2Factor"] = pump2Factor;
+    result["irrigation/lowDurationInSeconds"] = lowDurationInSeconds;
+    result["irrigation/lowWakeup"] = lowWakeup;
+    result["irrigation/highDurationInSeconds"] = highDurationInSeconds;
+    result["irrigation/highWakeup"] = highWakeup;
+    result["irrigation/pump2Factor"] = pump2Factor;
     return result;
 }
 
 void Irrigation::Configuration::set(std::map<String, String> config)
 {
-    lowIrrigationDurationInSeconds = config["lowIrrigationDurationInSeconds"].toInt();
-    lowWakeupUntilIrrigation = config["lowWakeupUntilIrrigation"].toInt();
-    highIrrigationDurationInSeconds = config["highIrrigationDurationInSeconds"].toInt();
-    highWakeupUntilIrrigation = config["highWakeupUntilIrrigation"].toInt();
-    pump2Factor = config["pump2Factor"].toFloat();
+    lowDurationInSeconds = config["irrigation/lowDurationInSeconds"].toInt();
+    lowWakeup = config["irrigation/lowWakeup"].toInt();
+    highDurationInSeconds = config["irrigation/highDurationInSeconds"].toInt();
+    highWakeup = config["irrigation/highWakeup"].toInt();
+    pump2Factor = config["irrigation/pump2Factor"].toFloat();
 }
 
 const char* Irrigation::htmlForm = 
@@ -45,18 +45,18 @@ const char* Irrigation::htmlForm =
     <label for="Humidity">Current humidity</label>
     <input type="text" id="Humidity" name="humidity" [value]="humidity">
 
-    <label for="lowIrrigationDurationInSeconds">Low humidity irrigation duration in seconds (30% rH)</label>
-    <input type="text" id="lowIrrigationDurationInSeconds" name="lowIrrigationDurationInSeconds" [value]="lowIrrigationDurationInSeconds">
-    <label for="lowWakeupUntilIrrigation">Low humidity amount of wakeups until irrigation (30% rH)</label>
-    <input type="text" id="lowWakeupUntilIrrigation" name="lowWakeupUntilIrrigation" [value]="lowWakeupUntilIrrigation">
+    <label for="lowDuration">Low humidity irrigation duration in seconds (30% rH)</label>
+    <input type="text" id="lowDuration" name="irrigation/lowDurationInSeconds" [value]="irrigation/lowDurationInSeconds">
+    <label for="lowWakeup">Low humidity amount of wakeups until irrigation (30% rH)</label>
+    <input type="text" id="lowWakeup" name="irrigation/lowWakeup" [value]="irrigation/lowWakeup">
 
-    <label for="highIrrigationDurationInSeconds">High humidity irrigation duration in seconds (60% rH)</label>
-    <input type="text" id="highIrrigationDurationInSeconds" name="highIrrigationDurationInSeconds" [value]="highIrrigationDurationInSeconds">
-    <label for="highWakeupUntilIrrigation">High humidity amount of wakeups until irrigation (60% rH)</label>
-    <input type="text" id="highWakeupUntilIrrigation" name="highWakeupUntilIrrigation" [value]="highWakeupUntilIrrigation">
+    <label for="highDuration">High humidity irrigation duration in seconds (60% rH)</label>
+    <input type="text" id="highDuration" name="irrigation/hightDurationInSeconds" [value]="irrigation/hightDurationInSeconds">
+    <label for="highWakeup">High humidity amount of wakeups until irrigation (60% rH)</label>
+    <input type="text" id="highWakeup" name="irrigation/highWakeup" [value]="irrigation/highWakeup">
 
     <label for="pump2Factor">Duration factor for pump 2</label>
-    <input type="text" id="pump2Factor" name="pump2Factor" [value]="pump2Factor">
+    <input type="text" id="pump2Factor" name="irrigation/pump2Factor" [value]="irrigation/pump2Factor">
 
     <input type="submit" value="Submit">
     </form>
@@ -108,9 +108,9 @@ void Irrigation::setConfig(jsonObject_t config) {
 
 uint16_t Irrigation::getIrrigationDurationInSeconds(uint8_t pumpNo) {
     float humidityDifference = 60 - 30;
-    float irrigationDifference = _config.highIrrigationDurationInSeconds - _config.lowIrrigationDurationInSeconds;
+    float irrigationDifference = _config.highDurationInSeconds - _config.lowDurationInSeconds;
     float relativeIrrigation = irrigationDifference / humidityDifference;
-    uint16_t duration = (_humidity - 30) * relativeIrrigation + _config.lowIrrigationDurationInSeconds;
+    uint16_t duration = (_humidity - 30) * relativeIrrigation + _config.lowDurationInSeconds;
     if (pumpNo == 2) {
         duration *= _config.pump2Factor;
     }
@@ -141,9 +141,9 @@ void Irrigation::run() {
 
 bool Irrigation::doIrrigation() {
     float humidityDifference = 60 - 30;
-    float wakeupDifference = _config.highWakeupUntilIrrigation - _config.lowWakeupUntilIrrigation;
+    float wakeupDifference = _config.highWakeup - _config.lowWakeup;
     float relativeWakeup = wakeupDifference / humidityDifference;
-    uint16_t neededWakeupAmount = (_humidity - 30) * relativeWakeup + _config.lowWakeupUntilIrrigation;
+    uint16_t neededWakeupAmount = (_humidity - 30) * relativeWakeup + _config.lowWakeup;
     PRINTLN_VARIABLE_IF_DEBUG(_wakeupAmount)
     PRINTLN_VARIABLE_IF_DEBUG(neededWakeupAmount)
     return _wakeupAmount >= neededWakeupAmount;
