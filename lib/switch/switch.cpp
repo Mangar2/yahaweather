@@ -43,17 +43,18 @@ Switch::Switch() {
     pinMode(D7, OUTPUT); 
 }
 
-void togglePin(uint8_t pin, String name, const std::map<String, String>& config) {
+void Switch::togglePin(uint8_t pin, String name, const jsonObject_t& config) {
     if (config.count(name) == 1 && config.at(name) == "toggle") {
         uint8_t newValue = digitalRead(pin) == LOW ? HIGH : LOW;
         PRINT_IF_DEBUG(pin)
         PRINT_IF_DEBUG(" = ")
         PRINTLN_IF_DEBUG(newValue)
         digitalWrite(pin, newValue);
+        sendMessageToDevices(name, newValue == HIGH ? "on" : "off");
     }
 }
 
-void Switch::set(std::map<String, String> config) {
+void Switch::setConfig(jsonObject_t config) {
     togglePin(D4, "D4", config);
     togglePin(D5, "D5", config);
     togglePin(D6, "D6", config);
@@ -63,8 +64,8 @@ void Switch::set(std::map<String, String> config) {
     togglePin(D10, "D10", config);
 }
 
-std::map<String, String> Switch::get() {
-    std::map<String, String> result;
+jsonObject_t Switch::getConfig() {
+    jsonObject_t result;
     result["D4"] = digitalRead(D4) == HIGH ? "on" : "off";
     result["D5"] = digitalRead(D5) == HIGH ? "on" : "off";
     result["D6"] = digitalRead(D6) == HIGH ? "on" : "off";

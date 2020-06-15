@@ -21,7 +21,6 @@
 #include <runtime.h>
 #include <battery.h>
 #include <irrigation.h>
-#include <switch.h>
 
 class YahaServer : public IMessageBroker {
 public:
@@ -65,10 +64,7 @@ public:
      */
     virtual void sendMessageToDevices(const String& key, const String& value);
 
-    static Runtime runtime;
     static BrokerProxy brokerProxy;
-    static Irrigation irrigation;
-    static Switch digitalSwitch;
 
 private:
 
@@ -89,5 +85,7 @@ private:
 
     bool _isBatteryMode;
     uint16_t _sleepTimeInSeconds;
+    Runtime _runtime;
+
 
 };

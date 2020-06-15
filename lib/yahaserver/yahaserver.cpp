@@ -15,10 +15,7 @@
 #include <rtc.h>
 
 YahaServer::Configuration YahaServer::_config;
-Runtime YahaServer::runtime;
 BrokerProxy YahaServer::brokerProxy;
-Irrigation YahaServer::irrigation;
-Switch YahaServer::digitalSwitch;
 std::vector<IDevice*> YahaServer::_devices;
 
 void YahaServer::sendMessageToDevices(const String& key, const String& value) {
@@ -56,7 +53,7 @@ void YahaServer::closeDown() {
         device->closeDown();
     }
     if (WLAN::isConnected()) {
-        brokerProxy.publishMessage(runtime.getMessage(brokerProxy.getBaseTopic()));
+        brokerProxy.publishMessage(_runtime.getMessage(brokerProxy.getBaseTopic()));
         brokerProxy.disconnect();
         delay(500);
         WLAN::disconnect(); 
@@ -68,22 +65,21 @@ void YahaServer::closeDown() {
 }
 
 void YahaServer::loop() {
-    for (auto const& device: _devices) {
-        device->run();
-    }
     if (WLAN::isConnected()) {
+        for (uint16_t i = 0; i < 30; i++) {
+            MQTTServer::handleClient();
+            delay(10);
+        }
         for(auto const& device: _devices) {
             brokerProxy.publishMessages(device->getMessages(brokerProxy.getBaseTopic()));
         }
         if (MQTTServer::isChanged()) {
             brokerProxy.publishMessages(MQTTServer::getMessages(brokerProxy.getBaseTopic()));
         }
-        for (uint16_t i = 0; i < 30; i++) {
-            MQTTServer::handleClient();
-            delay(10);
-        }
     }
-
+    for (auto const& device: _devices) {
+        device->run();
+    }
     if (_isBatteryMode) {
         closeDown();
     } else {
@@ -113,8 +109,6 @@ void YahaServer::setDeviceConfigFromJSON(jsonObject_t& config) {
         device->setConfig(config);
     }
     brokerProxy.setConfig(config);
-    irrigation.setConfig(config);
-    digitalSwitch.set(config);
 }
 
 void YahaServer::updateConfig(jsonObject_t config) {
@@ -122,7 +116,6 @@ void YahaServer::updateConfig(jsonObject_t config) {
     setEEPROMConfigFromJSON(config);
     setDeviceConfigFromJSON(config);
     
-    MQTTServer::setData(digitalSwitch.get());
     EEPROMAccess::write(EEPROM_START_ADDR, (uint8_t*) &_config, sizeof(_config));
     EEPROMAccess::commit();
     PRINTLN_IF_DEBUG("Configuration committed")

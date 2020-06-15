@@ -84,27 +84,39 @@ Irrigation::Irrigation(uint8_t pump1Pin, uint8_t pump2Pin)
 Messages_t Irrigation::getMessages(const String& baseTopic) {
 
     std::vector<Message> result;
-    result.push_back(Message(
-        baseTopic + "/irrigation/pump1",
-        String(getIrrigationDurationInSeconds(1)),
-        "send by yaha ESP8266 module"
-    ));
-    result.push_back(Message(
-        baseTopic + "/irrigation/pump2",
-        String(getIrrigationDurationInSeconds(2)),
-        "send by yaha ESP8266 module"
-    ));
+    if (doIrrigation()) {
+        result.push_back(Message(
+            baseTopic + "/irrigation/pump1",
+            String(getIrrigationDurationInSeconds(1)),
+            "send by yaha ESP8266 module"
+        ));
+        result.push_back(Message(
+            baseTopic + "/irrigation/pump2",
+            String(getIrrigationDurationInSeconds(2)),
+            "send by yaha ESP8266 module"
+        ));
+    }
 
     return result;
 }
 
 void Irrigation::setConfig(jsonObject_t config) { 
     _config.set(config); 
-    _humidity = config["humidity"].toFloat();
-    _wakeupAmount = config["rtc/wakeupAmount"].toFloat();
-    PRINT_IF_DEBUG("Irrigation set Config ")
-    PRINTLN_VARIABLE_IF_DEBUG(_wakeupAmount)
 };
+
+
+void Irrigation::handleMessage(const String& key, const String& value) {
+    if (key == "sensor/humidity") { 
+        _humidity = value.toFloat();
+        PRINT_IF_DEBUG("Irrigation received:  ")
+        PRINTLN_VARIABLE_IF_DEBUG(_humidity)
+    } else if (key == "rtc/wakeupAmount") {
+        _wakeupAmount = value.toInt();
+        PRINT_IF_DEBUG("Irrigation received:  ")
+        PRINTLN_VARIABLE_IF_DEBUG(_wakeupAmount)
+    }
+}
+
 
 uint16_t Irrigation::getIrrigationDurationInSeconds(uint8_t pumpNo) {
     float humidityDifference = 60 - 30;
@@ -119,23 +131,21 @@ uint16_t Irrigation::getIrrigationDurationInSeconds(uint8_t pumpNo) {
 
 void Irrigation::run() {
     const uint32_t MILLISECONDS_IN_A_SECOND = 1000;
-    for (int pumpNo = 1; pumpNo <= 2; pumpNo++) {
-        const uint16_t timeInSeconds = getIrrigationDurationInSeconds(pumpNo);
-        const uint8_t pumpPin = pumpNo == 1 ? _pump1Pin : _pump2Pin;
-        PRINT_IF_DEBUG("Pump ");
-        PRINT_IF_DEBUG(pumpNo)
-        PRINT_IF_DEBUG(" on for ");
-        PRINT_IF_DEBUG(timeInSeconds / 60);
-        PRINT_IF_DEBUG(":");
-        PRINT_IF_DEBUG(timeInSeconds % 60);
-        PRINTLN_VARIABLE_IF_DEBUG(pumpPin)
-        digitalWrite(pumpPin, HIGH);
-        for (uint16_t cnt = 0; cnt < timeInSeconds; cnt ++) {
-            PRINT_IF_DEBUG(".");
-            delay(MILLISECONDS_IN_A_SECOND);
+    if (doIrrigation()) {
+        for (int pumpNo = 1; pumpNo <= 2; pumpNo++) {
+            const uint16_t timeInSeconds = getIrrigationDurationInSeconds(pumpNo);
+            const uint8_t pumpPin = pumpNo == 1 ? _pump1Pin : _pump2Pin;
+            PRINT_IF_DEBUG(String("Pump ") + pumpNo + " on for " + timeInSeconds / 60 + ":" + timeInSeconds % 60);
+            PRINTLN_VARIABLE_IF_DEBUG(pumpPin)
+            digitalWrite(pumpPin, HIGH);
+            for (uint16_t cnt = 0; cnt < timeInSeconds; cnt ++) {
+                PRINT_IF_DEBUG(".");
+                delay(MILLISECONDS_IN_A_SECOND);
+            }
+            digitalWrite(pumpPin, LOW);
+            PRINTLN_IF_DEBUG(" Pump off");
         }
-        digitalWrite(pumpPin, LOW);
-        PRINTLN_IF_DEBUG(" Pump off");
+        sendMessageToDevices("rtc/wakeupAmount", "0");
     }
 }
 

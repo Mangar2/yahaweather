@@ -10,8 +10,8 @@
  */
 
 #define __DEBUG
-#define __IRRIGATION
 #define __BME
+#define __IRRIGATION
 #define __SWITCH
 
 #include <vector>
@@ -22,6 +22,14 @@
 #include <yahabme280.h>
 const uint16_t BME_I2C_ADDRESS = 0x76;
 const uint8_t ACTIVATE_BME280_PIN = 14;
+#endif
+
+#ifdef __IRRIGATION
+#include <irrigation.h>
+#endif
+
+#ifdef __SWITCH
+#include <switch.h>
 #endif
 
 const uint32_t SERIAL_SPEED = 115200;
@@ -40,10 +48,10 @@ void setup() {
     server.addDevice(new YahaBME280(BME_I2C_ADDRESS, ACTIVATE_BME280_PIN));
     #endif
     #ifdef __IRRIGATION
-    MQTTServer::addForm("/irrigation", "Irrigation", server.irrigation.htmlForm);
+    server.addDevice(new Irrigation());
     #endif
     #ifdef __SWITCH
-    MQTTServer::addForm("/switch", "Switch", server.digitalSwitch.htmlForm);
+    server.addDevice(new Switch());
     #endif
 
 }
@@ -52,15 +60,5 @@ void setup() {
  * main loop
  */
 void loop() {
-    #ifdef __IRRIGATION
-    if (WLAN::isConnected()) {
-         if (server.irrigation.doIrrigation()) {
-            server.brokerProxy.publishMessages(server.irrigation.getMessages(server.brokerProxy.getBaseTopic()));
-            server.irrigation.run();
-            server.sendMessageToDevices("rtc/wakeupAmount", "0");
-        }
-    }
-    #endif
     server.loop();
-
 }

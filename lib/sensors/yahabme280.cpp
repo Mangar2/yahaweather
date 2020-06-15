@@ -29,14 +29,14 @@ void YahaBME280::init(uint16_t bmeWireAddress)
 
     if (!_bmeAvailable)
     {
-        PRINT_IF_DEBUG("Could not find a valid BME280; Sensor-ID: ");
+        PRINT_IF_DEBUG("Could not find a valid sensor; Sensor-ID: ");
         PRINT_IF_DEBUG(bme.sensorID())
         PRINTLN_IF_DEBUG()
         IF_DEBUG(ScanI2CBus();)
     }
     else
     {
-        PRINTLN_IF_DEBUG("BME280 found, start measuring");
+        PRINTLN_IF_DEBUG("sensor found, start measuring");
     }
 }
 
@@ -58,13 +58,13 @@ HtmlPageInfo YahaBME280::getHtmlPage() {
         R"htmlweather(
         <form>
         <label for="temperature">Temperature</label>
-        <input type="text" id="temperature" readonly [value]="temperature">
+        <input type="text" id="temperature" readonly [value]="sensor/temperature">
         <label for="humidity">Humidity</label>
-        <input type="text" id="humidity" readonly [value]="humidity">
+        <input type="text" id="humidity" readonly [value]="sensor/humidity">
         <label for="pressure">Barometric pressure</label>
-        <input type="text" id="pressure" readonly [value]="pressure">
+        <input type="text" id="pressure" readonly [value]="sensor/pressure">
         <label for="battery">Battery voltage</label>
-        <input type="text" id="voltage" readonly [value]="voltage">
+        <input type="text" id="voltage" readonly [value]="battery/voltage">
         </form>
         )htmlweather",
         "/",
@@ -73,17 +73,17 @@ HtmlPageInfo YahaBME280::getHtmlPage() {
 }
 
 void YahaBME280::run() {
-    sendMessageToDevices("temperature", String(bme.readTemperature()));
-    sendMessageToDevices("humidity", String(bme.readHumidity()));
-    sendMessageToDevices("pressure", String(bme.readPressure()));
+    sendMessageToDevices("sensor/temperature", String(bme.readTemperature()));
+    sendMessageToDevices("sensor/humidity", String(bme.readHumidity()));
+    sendMessageToDevices("sensor/pressure", String(bme.readPressure()));
 }
 
 Messages_t YahaBME280::getMessages(const String& baseTopic) {
     Messages_t result;
     if (isValid()) {
-        const Message pressureMessage(baseTopic + "/bme280/pressure", String(readPressure()), "send by ESP8266");
-        const Message humidityMessage(baseTopic + "/bme280/humidity", String(readHumidity()), "send by ESP8266");
-        const Message temperatureMessage(baseTopic + "/bme280/temperature", String(readTemperature()), "send by ESP8266");
+        const Message pressureMessage(baseTopic + "/sensor/pressure", String(readPressure()), "send by ESP8266");
+        const Message humidityMessage(baseTopic + "/sensor/humidity", String(readHumidity()), "send by ESP8266");
+        const Message temperatureMessage(baseTopic + "/sensor/temperature", String(readTemperature()), "send by ESP8266");
         result.push_back(temperatureMessage);
         result.push_back(humidityMessage);
         result.push_back(pressureMessage);

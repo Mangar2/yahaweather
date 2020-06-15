@@ -59,6 +59,13 @@ public:
      */
     virtual Messages_t getMessages(const String& baseTopic);
 
+    
+    /**
+     * Sets battery mode on fast reset
+     * @param config all relevant data
+     */
+    virtual void handleMessage(const String& key, const String& value);
+
     /**
      * Checks, if irrigation should be done
      * @returns true, if irrigation should be done
@@ -66,16 +73,15 @@ public:
     bool doIrrigation();
 
     /**
-     * Called on setup of the irrigation
-     */
-    virtual void setup();
-
-    /**
      * Runs the irrigation
      */
     virtual void run();
 
-    static const char* htmlForm;
+    /**
+     * Gets an info about the matching html page
+     */
+    virtual HtmlPageInfo getHtmlPage() { return HtmlPageInfo(htmlForm, "/irrigation", "Irrigation"); }
+
 
 private:
 
@@ -90,4 +96,5 @@ private:
     uint8_t _pump2Pin;
     float _humidity;
     uint16_t _wakeupAmount;
+    static const char* htmlForm;
 };
