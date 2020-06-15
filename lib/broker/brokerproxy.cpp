@@ -10,7 +10,8 @@
  */
 
 #include <Arduino.h>
-#include "debug.h"
+#include <debug.h>
+#include <eepromaccess.h>
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266HTTPClient.h>
@@ -45,6 +46,16 @@ void BrokerProxy::Configuration::set(jsonObject_t& config)
     clientName = config["clientName"];
     baseTopic = config["baseTopic"];
     subscribeTo = config["subscribeTo"];
+}
+
+uint16_t BrokerProxy::writeConfigToEEPROM(uint16_t EEPROMAddress) {
+    EEPROMAccess::write(EEPROMAddress, (uint8_t*) &_config, sizeof(_config));
+    return EEPROMAddress + sizeof(_config);
+}
+
+uint16_t BrokerProxy::readConfigFromEEPROM(uint16_t EEPROMAddress) { 
+    EEPROMAccess::read(EEPROMAddress, (uint8_t*) &_config, sizeof(_config));
+    return EEPROMAddress + sizeof(_config);
 }
 
 void BrokerProxy::sendToServer(String urlWithoutHost, String jsonBody, headers_t headers) {

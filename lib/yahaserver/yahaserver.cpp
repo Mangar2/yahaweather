@@ -12,10 +12,10 @@
 #define __DEBUG
 #include "yahaserver.h"
 #include <debug.h>
-#include <rtc.h>
 
 YahaServer::Configuration YahaServer::_config;
 BrokerProxy YahaServer::brokerProxy;
+WLAN YahaServer::wlan;
 std::vector<IDevice*> YahaServer::_devices;
 
 void YahaServer::sendMessageToDevices(const String& key, const String& value) {
@@ -33,8 +33,8 @@ void YahaServer::sendMessageToDevices(const String& key, const String& value) {
 
 void YahaServer::setup(const String stationSSID) {
     MQTTServer::registerOnUpdateFunction(updateConfig);
-    addDevice(new Battery());
-    addDevice(new RTC());
+    addDevice(&brokerProxy);
+    addDevice(&wlan);
     setupEEPROM();
     MQTTServer::begin();
     WLAN::connect(_config.wlan, stationSSID);
@@ -91,32 +91,31 @@ void YahaServer::loop() {
 }
 
 void YahaServer::setMQTTDataFromEEPROMConfig() {
-    MQTTServer::setData(_config.battery.get());
-    MQTTServer::setData(_config.broker.get());
-    MQTTServer::setData(_config.irrigation.get());
     MQTTServer::setData(_config.wlan.get());
 }
 
 void YahaServer::setEEPROMConfigFromJSON(jsonObject_t& config) {
     _config.wlan.set(config);
-    _config.broker.set(config);
-    _config.battery.set(config);
-    _config.irrigation.set(config);
 }
 
 void YahaServer::setDeviceConfigFromJSON(jsonObject_t& config) {
     for (auto const& device: _devices) {
         device->setConfig(config);
     }
-    brokerProxy.setConfig(config);
 }
 
 void YahaServer::updateConfig(jsonObject_t config) {
     PRINTLN_IF_DEBUG("update Configuration")
     setEEPROMConfigFromJSON(config);
     setDeviceConfigFromJSON(config);
-    
+    uint16_t EEPROMAddress = EEPROM_START_ADDR;
     EEPROMAccess::write(EEPROM_START_ADDR, (uint8_t*) &_config, sizeof(_config));
+    EEPROMAddress += sizeof(_config);
+
+    for (auto const& device: _devices) {
+        EEPROMAddress = device->writeConfigToEEPROM(EEPROMAddress);
+    }
+        
     EEPROMAccess::commit();
     PRINTLN_IF_DEBUG("Configuration committed")
 }
@@ -127,7 +126,13 @@ void YahaServer::setupEEPROM() {
 
     PRINTLN_IF_DEBUG("Setup EEPROM")
     EEPROMAccess::init();
-    EEPROMAccess::read(EEPROM_START_ADDR, (uint8_t*) &_config, sizeof(_config));
+    uint16_t EEPROMAddress = EEPROM_START_ADDR;
+    EEPROMAccess::read(EEPROMAddress, (uint8_t*) &_config, sizeof(_config));
+    EEPROMAddress += sizeof(_config);
+    for (auto const& device: _devices) {
+        EEPROMAddress = device->readConfigFromEEPROM(EEPROMAddress);
+    }
+
     if (_config.wlan.isInitialized()) {
         // Overwrite MQTT data from EEPROM values
         setMQTTDataFromEEPROMConfig();
@@ -135,6 +140,9 @@ void YahaServer::setupEEPROM() {
         _config.wlan.clear();
     }
     setDeviceConfigFromJSON(MQTTServer::getData());
+    for (auto const& device: _devices) {
+        MQTTServer::setData(device->getConfig());
+    }
     PRINTLN_IF_DEBUG("Setup EEPROM finished")
 }
 

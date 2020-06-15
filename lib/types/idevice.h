@@ -28,13 +28,27 @@ public:
      * @returns configuration 
      */
     virtual jsonObject_t getConfig() { return jsonObject_t(); };
+
+    /**
+     * Writes the configuration to EEPROM
+     * @param EEPROMAddress EEPROM address to write to
+     * @returns EEPROM address for the next device
+     */
+    virtual uint16_t writeConfigToEEPROM(uint16_t EEPROMAddress) { return EEPROMAddress; }
+
+    /**
+     * Reads configuration from EEPROM
+     * @param EEPROMAddress EEPROM address to read from
+     * @returns EEPROM address for the next device
+     */
+    virtual uint16_t readConfigFromEEPROM(uint16_t EEPROMAddress) { return EEPROMAddress; }
     
     /**
      * Gets messages to send
      * @param baseTopic start topic to be used to create the message topic
      * @returns a list of messages to send with topic, value and reason
      */
-    virtual Messages_t getMessages(const String& baseTopic) = 0;
+    virtual Messages_t getMessages(const String& baseTopic) { return Messages_t(); }
 
     /**
      * Handles a message send to devices

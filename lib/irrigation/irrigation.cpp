@@ -8,7 +8,8 @@
  */
 
 #define __DEBUG
-#include "debug.h"
+#include <debug.h>
+#include <eepromaccess.h>
 #include "irrigation.h"
 
 Irrigation::Configuration::Configuration() {
@@ -104,6 +105,15 @@ void Irrigation::setConfig(jsonObject_t config) {
     _config.set(config); 
 };
 
+uint16_t Irrigation::writeConfigToEEPROM(uint16_t EEPROMAddress) {
+    EEPROMAccess::write(EEPROMAddress, (uint8_t*) &_config, sizeof(_config));
+    return EEPROMAddress + sizeof(_config);
+}
+
+uint16_t Irrigation::readConfigFromEEPROM(uint16_t EEPROMAddress) { 
+    EEPROMAccess::read(EEPROMAddress, (uint8_t*) &_config, sizeof(_config));
+    return EEPROMAddress + sizeof(_config);
+}
 
 void Irrigation::handleMessage(const String& key, const String& value) {
     if (key == "sensor/humidity") { 

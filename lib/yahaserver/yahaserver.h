@@ -19,8 +19,6 @@
 #include <mqttserver.h>
 #include <eepromaccess.h>
 #include <runtime.h>
-#include <battery.h>
-#include <irrigation.h>
 
 class YahaServer : public IMessageBroker {
 public:
@@ -65,6 +63,7 @@ public:
     virtual void sendMessageToDevices(const String& key, const String& value);
 
     static BrokerProxy brokerProxy;
+    static WLAN wlan;
 
 private:
 
@@ -73,10 +72,7 @@ private:
     static void setDeviceConfigFromJSON(jsonObject_t& config);
 
     struct Configuration {
-        BrokerProxy::Configuration broker;
         WLAN::Configuration wlan;
-        Battery::Configuration battery;
-        Irrigation::Configuration irrigation;
     };
 
     static Configuration _config;

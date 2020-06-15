@@ -68,6 +68,20 @@ public:
     }
 
     /**
+     * Writes the configuration to EEPROM
+     * @param EEPROMAddress EEPROM address to write to
+     * @returns EEPROM address for the next device
+     */
+    virtual uint16_t writeConfigToEEPROM(uint16_t EEPROMAddress);
+
+    /**
+     * Reads configuration from EEPROM
+     * @param EEPROMAddress EEPROM address to read from
+     * @returns EEPROM address for the next device
+     */
+    virtual uint16_t readConfigFromEEPROM(uint16_t EEPROMAddress);
+
+    /**
      * Sends voltage measurement to all devices on setup
      */
     virtual void setup() {

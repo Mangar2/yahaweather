@@ -7,7 +7,8 @@
  * @copyright Copyright (c) 2020 Volker Böhm
  */
 
-#include "debug.h"
+#include <debug.h>
+#include <eepromaccess.h>
 #include "battery.h"
 
 Battery::Configuration::Configuration() {
@@ -78,6 +79,16 @@ const char* Battery::htmlForm =
     <input type="submit" value="Submit">
     </form>
     )htmlform";
+
+uint16_t Battery::writeConfigToEEPROM(uint16_t EEPROMAddress) {
+    EEPROMAccess::write(EEPROMAddress, (uint8_t*) &_config, sizeof(_config));
+    return EEPROMAddress + sizeof(_config);
+}
+
+uint16_t Battery::readConfigFromEEPROM(uint16_t EEPROMAddress) { 
+    EEPROMAccess::read(EEPROMAddress, (uint8_t*) &_config, sizeof(_config));
+    return EEPROMAddress + sizeof(_config);
+}
 
 Messages_t Battery::getMessages(const String& baseTopic) {
 

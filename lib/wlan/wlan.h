@@ -11,12 +11,14 @@
 #pragma once
 #include <Arduino.h>
 #include <map>
-#include "debug.h"
+#include <debug.h>
+#include <message.h>
+#include <idevice.h>
 #include "staticstring.h"
 
 
 
-class WLAN {
+class WLAN : public IDevice {
 public:
 
     struct Configuration {

@@ -16,6 +16,8 @@
 
 #include <vector>
 #include <debug.h>
+#include <rtc.h>
+#include <battery.h>
 #include <yahaserver.h>
 
 #ifdef __BME
@@ -43,7 +45,8 @@ YahaServer server;
  */
 void setup() {
     INIT_SERIAL_IF_DEBUG(SERIAL_SPEED)
-    server.setup(STATION_NAME);
+    server.addDevice(new Battery());
+    server.addDevice(new RTC());
     #ifdef __BME
     server.addDevice(new YahaBME280(BME_I2C_ADDRESS, ACTIVATE_BME280_PIN));
     #endif
@@ -53,7 +56,7 @@ void setup() {
     #ifdef __SWITCH
     server.addDevice(new Switch());
     #endif
-
+    server.setup(STATION_NAME);
 }
 
 /**

@@ -13,13 +13,14 @@
 
 #include <Arduino.h>
 #include <map>
+#include <idevice.h>
 #include "staticstring.h"
 #include "message.h"
 #include "wlan.h"
 
 typedef std::map<String, String> headers_t;
 
-class BrokerProxy {
+class BrokerProxy : public IDevice {
 public:
 
     struct Configuration {
@@ -55,7 +56,21 @@ public:
     /**
      * Gets the configuration
      */
-    Configuration& getConfiguration() { return _config; }
+    virtual jsonObject_t getConfig() { return _config.get(); }
+
+    /**
+     * Writes the configuration to EEPROM
+     * @param EEPROMAddress EEPROM address to write to
+     * @returns EEPROM address for the next device
+     */
+    virtual uint16_t writeConfigToEEPROM(uint16_t EEPROMAddress);
+
+    /**
+     * Reads configuration from EEPROM
+     * @param EEPROMAddress EEPROM address to read from
+     * @returns EEPROM address for the next device
+     */
+    virtual uint16_t readConfigFromEEPROM(uint16_t EEPROMAddress);
 
     /**
      * Connects to the yaha "near-mqtt" broker
