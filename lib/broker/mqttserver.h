@@ -80,6 +80,7 @@ public:
      * Returns true, if settings has been changed
      */
     static bool isChanged() { return _isChanged; }
+    static void setChanged(bool changed) { _isChanged = changed; }
 
 private:
     MQTTServer() {

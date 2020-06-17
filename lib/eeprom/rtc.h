@@ -46,7 +46,7 @@ public:
      * @param key message identifier
      * @param value message value
      */
-    virtual void handleDeviceMessage(const String& key, const String& value) {
+    virtual void handleMessage(const String& key, const String& value) {
         if (key == "rtc/wakeupAmount") {
             setWakeupAmount(value.toInt());
         }

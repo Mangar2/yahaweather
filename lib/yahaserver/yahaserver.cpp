@@ -43,12 +43,13 @@ void YahaServer::setup(const String stationSSID) {
 
 void YahaServer::closeDown() {
     const uint32_t DEEP_SLEEP_ONE_SECOND = 1000000;
+    if (wlan.isConnected()) {
+        brokerProxy.publishMessage(_runtime.getMessage(brokerProxy.getBaseTopic()));
+    }
     for (auto const& device: _devices) {
         device->closeDown();
     }
     if (wlan.isConnected()) {
-        brokerProxy.publishMessage(_runtime.getMessage(brokerProxy.getBaseTopic()));
-        brokerProxy.disconnect();
         delay(500);
         wlan.disconnect(); 
     }
@@ -69,6 +70,7 @@ void YahaServer::loop() {
         }
         if (MQTTServer::isChanged()) {
             brokerProxy.publishMessages(MQTTServer::getMessages(brokerProxy.getBaseTopic()));
+            MQTTServer::setChanged(false);
         }
     }
     for (auto const& device: _devices) {

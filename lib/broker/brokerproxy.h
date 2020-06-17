@@ -83,6 +83,11 @@ public:
     virtual void setup() { connect(); }
 
     /**
+     * Disconnects from broker
+     */
+    virtual void closeDown() { disconnect(); }
+
+    /**
      * Connects to the yaha "near-mqtt" broker
      */
     void connect(const String& port = "80");

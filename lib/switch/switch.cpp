@@ -44,14 +44,23 @@ Switch::Switch() {
 }
 
 void Switch::togglePin(uint8_t pin, String name, const jsonObject_t& config) {
-    if (config.count(name) == 1 && config.at(name) == "toggle") {
-        uint8_t newValue = digitalRead(pin) == LOW ? HIGH : LOW;
+    if (!config.count(name) == 1) {
+        return;
+    }
+    uint8_t pinState = digitalRead(pin);
+    bool toggleCommand = config.at(name) == "toggle";
+    bool changeState = 
+        (config.at(name) == "off" && pinState == HIGH) ||
+        (config.at(name) == "on" && pinState == LOW);
+
+    if (toggleCommand || changeState) {
+        uint8_t newValue = pinState == LOW ? HIGH : LOW;
         PRINT_IF_DEBUG(pin)
         PRINT_IF_DEBUG(" = ")
         PRINTLN_IF_DEBUG(newValue)
         digitalWrite(pin, newValue);
         sendMessageToDevices(name, newValue == HIGH ? "on" : "off");
-    }
+    } 
 }
 
 void Switch::setConfig(jsonObject_t& config) {

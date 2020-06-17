@@ -30,11 +30,12 @@ void MQTTServer::onPublish() {
     String value = json.getElement("value");
     topic.replace("/set", "");
     uint16_t lastChunkStart = topic.lastIndexOf("/");
-    String propertyName = topic.substring(lastChunkStart + 1);
+    uint16_t secondLastChungStart = topic.lastIndexOf("/", lastChunkStart - 1);
+    String propertyName = topic.substring(secondLastChungStart + 1);
     setData(propertyName, value);
     _onUpdateFunction(_data);
     String id = _httpServer->header("id");
-    _isChanged = true;
+    setChanged(true);
     PRINTLN_VARIABLE_IF_DEBUG(id)
 
     _httpServer->sendHeader("id", id);
@@ -82,12 +83,12 @@ void MQTTServer::on(const String& uri) {
     THandlerFunction handler = []() { _onUpdateFunction(_data); };
     _httpServer->on(uri, HTTP_POST, [uri, handler]() {
         PRINTLN_VARIABLE_IF_DEBUG(uri)
-        _isChanged = true;
+        setChanged(true);
         for (uint16_t i = 0; i < _httpServer->args(); i++) {
             PRINT_VARIABLE_IF_DEBUG(_httpServer->argName(i))
             PRINT_IF_DEBUG(" = ")
             PRINTLN_VARIABLE_IF_DEBUG(_httpServer->arg(i))
-            bool isPlainArgumentList = _httpServer->argName(i) != "plain";
+            bool isPlainArgumentList = _httpServer->argName(i) == "plain";
             if (!isPlainArgumentList) {
                 _data[_httpServer->argName(i)] = _httpServer->arg(i);
             }
@@ -123,7 +124,7 @@ void MQTTServer::registerOnUpdateFunction(TOnUpdateFunction handler) {
 void MQTTServer::restServerRouting() {
     _httpServer->on("/publish", HTTP_PUT, onPublish);
     _httpServer->on("/css.css", HTTP_GET, []() {
-        _httpServer->sendHeader("Cache-Control", "max-age=60");
+        _httpServer->sendHeader("Cache-Control", "max-age=3600");
         _httpServer->send(200, "text/css", cssFile);
     });
     _httpServer->onNotFound([]() {
