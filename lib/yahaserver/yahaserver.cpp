@@ -13,7 +13,6 @@
 #include "yahaserver.h"
 #include <debug.h>
 
-YahaServer::Configuration YahaServer::_config;
 BrokerProxy YahaServer::brokerProxy;
 WLAN YahaServer::wlan;
 std::vector<IDevice*> YahaServer::_devices;
@@ -32,14 +31,9 @@ void YahaServer::sendMessageToDevices(const String& key, const String& value) {
 }
 
 void YahaServer::setup(const String stationSSID) {
-    MQTTServer::registerOnUpdateFunction(updateConfig);
-    addDevice(&brokerProxy);
-    addDevice(&wlan);
     setupEEPROM();
     MQTTServer::begin();
-    WLAN::connect(_config.wlan, stationSSID);
-    brokerProxy.connect();
-    MQTTServer::addForm("/wlan", "Wlan", WLAN::htmlForm);
+    wlan.connect(stationSSID);
     for (auto const& device: _devices) {
         MQTTServer::addForm(device->getHtmlPage());
         device->setup();
@@ -52,11 +46,11 @@ void YahaServer::closeDown() {
     for (auto const& device: _devices) {
         device->closeDown();
     }
-    if (WLAN::isConnected()) {
+    if (wlan.isConnected()) {
         brokerProxy.publishMessage(_runtime.getMessage(brokerProxy.getBaseTopic()));
         brokerProxy.disconnect();
         delay(500);
-        WLAN::disconnect(); 
+        wlan.disconnect(); 
     }
     String message = "\nDisconnected from WiFi, going to sleep for " + String(_sleepTimeInSeconds) + " seconds ...";
     PRINTLN_IF_DEBUG(message)
@@ -65,7 +59,7 @@ void YahaServer::closeDown() {
 }
 
 void YahaServer::loop() {
-    if (WLAN::isConnected()) {
+    if (wlan.isConnected()) {
         for (uint16_t i = 0; i < 30; i++) {
             MQTTServer::handleClient();
             delay(10);
@@ -90,13 +84,6 @@ void YahaServer::loop() {
     }
 }
 
-void YahaServer::setMQTTDataFromEEPROMConfig() {
-    MQTTServer::setData(_config.wlan.get());
-}
-
-void YahaServer::setEEPROMConfigFromJSON(jsonObject_t& config) {
-    _config.wlan.set(config);
-}
 
 void YahaServer::setDeviceConfigFromJSON(jsonObject_t& config) {
     for (auto const& device: _devices) {
@@ -106,13 +93,10 @@ void YahaServer::setDeviceConfigFromJSON(jsonObject_t& config) {
 
 void YahaServer::updateConfig(jsonObject_t config) {
     PRINTLN_IF_DEBUG("update Configuration")
-    setEEPROMConfigFromJSON(config);
-    setDeviceConfigFromJSON(config);
     uint16_t EEPROMAddress = EEPROM_START_ADDR;
-    EEPROMAccess::write(EEPROM_START_ADDR, (uint8_t*) &_config, sizeof(_config));
-    EEPROMAddress += sizeof(_config);
 
     for (auto const& device: _devices) {
+        device->setConfig(config);
         EEPROMAddress = device->writeConfigToEEPROM(EEPROMAddress);
     }
         
@@ -122,28 +106,27 @@ void YahaServer::updateConfig(jsonObject_t config) {
 
 void YahaServer::setupEEPROM() {
     // Initializes MQTT data from default values
-    setMQTTDataFromEEPROMConfig();
 
-    PRINTLN_IF_DEBUG("Setup EEPROM")
     EEPROMAccess::init();
     uint16_t EEPROMAddress = EEPROM_START_ADDR;
-    EEPROMAccess::read(EEPROMAddress, (uint8_t*) &_config, sizeof(_config));
-    EEPROMAddress += sizeof(_config);
+
     for (auto const& device: _devices) {
+        // Save initialized values, if eeprom is not initialized
+        MQTTServer::setData(device->getConfig());
         EEPROMAddress = device->readConfigFromEEPROM(EEPROMAddress);
     }
 
-    if (_config.wlan.isInitialized()) {
-        // Overwrite MQTT data from EEPROM values
-        setMQTTDataFromEEPROMConfig();
+    if (wlan.isInitialized()) {
+        PRINTLN_IF_DEBUG("Setup configuration from EEPROM")
+        for (auto const& device: _devices) {
+            MQTTServer::setData(device->getConfig());
+        }
     } else {
-        _config.wlan.clear();
+        PRINTLN_IF_DEBUG("No configuration in EEPROM, please configure the device")
+        wlan.clear();
+        // Restore saved values
+        setDeviceConfigFromJSON(MQTTServer::getData());
     }
-    setDeviceConfigFromJSON(MQTTServer::getData());
-    for (auto const& device: _devices) {
-        MQTTServer::setData(device->getConfig());
-    }
-    PRINTLN_IF_DEBUG("Setup EEPROM finished")
 }
 
 

@@ -87,7 +87,10 @@ void MQTTServer::on(const String& uri) {
             PRINT_VARIABLE_IF_DEBUG(_httpServer->argName(i))
             PRINT_IF_DEBUG(" = ")
             PRINTLN_VARIABLE_IF_DEBUG(_httpServer->arg(i))
-            _data[_httpServer->argName(i)] = _httpServer->arg(i);
+            bool isPlainArgumentList = _httpServer->argName(i) != "plain";
+            if (!isPlainArgumentList) {
+                _data[_httpServer->argName(i)] = _httpServer->arg(i);
+            }
         }
         handler();
         String form = createForm(uri);
@@ -118,9 +121,6 @@ void MQTTServer::registerOnUpdateFunction(TOnUpdateFunction handler) {
 }
 
 void MQTTServer::restServerRouting() {
-    PRINTLN_IF_DEBUG("REST SERVER ROUTING")
-    addForm("/broker", "Broker", htmlBrokerForm);
-    addForm("/client", "Client", htmlClientForm);
     _httpServer->on("/publish", HTTP_PUT, onPublish);
     _httpServer->on("/css.css", HTTP_GET, []() {
         _httpServer->sendHeader("Cache-Control", "max-age=60");
@@ -147,7 +147,7 @@ Messages_t MQTTServer::getMessages(const String& baseTopic) {
     for (auto const& property: _data) {
         String lowerCasePropertyName = property.first;
         lowerCasePropertyName.toLowerCase();
-        if (lowerCasePropertyName == "password") {
+        if (lowerCasePropertyName.endsWith("password")) {
             continue;
         }
         const Message propertyMessage(baseTopic + "/" + property.first, property.second, "info from ESP8266");

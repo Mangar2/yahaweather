@@ -7,6 +7,7 @@
  * @copyright Copyright (c) 2020 Volker Böhm
  */
 
+#define __DEBUG
 #include <debug.h>
 #include <eepromaccess.h>
 #include "battery.h"
@@ -93,7 +94,7 @@ uint16_t Battery::readConfigFromEEPROM(uint16_t EEPROMAddress) {
 Messages_t Battery::getMessages(const String& baseTopic) {
 
     const Message runtimeMessage(
-        baseTopic + "/battery",
+        baseTopic + "/battery/voltage",
         String(measureVoltage()),
         "send by yaha ESP8266 module");
 
@@ -116,7 +117,5 @@ uint16_t Battery::getSleepTimeInSeconds() {
 float Battery::measureVoltage() {
     float divisor = _config.voltageCalibrationDivisor == 0 ? 1 : _config.voltageCalibrationDivisor;
     float batteryValue = analogRead(BATTERY_PIN) / divisor;
-    PRINTLN_VARIABLE_IF_DEBUG(_config.voltageCalibrationDivisor)
-    PRINTLN_VARIABLE_IF_DEBUG(analogRead(BATTERY_PIN))
     return batteryValue;
 }

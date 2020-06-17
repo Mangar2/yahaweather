@@ -22,7 +22,11 @@
 
 class YahaServer : public IMessageBroker {
 public:
-    YahaServer() : _isBatteryMode(true) {}
+    YahaServer() : _isBatteryMode(true) {
+        MQTTServer::registerOnUpdateFunction(updateConfig);
+        addDevice(&wlan);
+        addDevice(&brokerProxy);
+    }
 
     /**
      * Setup everything
@@ -67,15 +71,8 @@ public:
 
 private:
 
-    static void setMQTTDataFromEEPROMConfig();
-    static void setEEPROMConfigFromJSON(jsonObject_t& config);
     static void setDeviceConfigFromJSON(jsonObject_t& config);
 
-    struct Configuration {
-        WLAN::Configuration wlan;
-    };
-
-    static Configuration _config;
     static const uint16_t EEPROM_START_ADDR = 0;
     static std::vector<IDevice*> _devices;
 

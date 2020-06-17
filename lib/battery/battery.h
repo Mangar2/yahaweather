@@ -45,7 +45,7 @@ public:
     /**
      * Sets the battery configuration
      */
-    virtual void setConfig(jsonObject_t config) { 
+    virtual void setConfig(jsonObject_t& config) { 
         _config.set(config); 
         setBatteryMode(_config.batteryMode);
     }

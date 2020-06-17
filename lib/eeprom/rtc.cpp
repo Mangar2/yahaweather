@@ -41,7 +41,8 @@ public:
  */
 void RTC::setup() {
     sendMessageToDevices("rtc/wakeupAmount", String(getWakeupAmount()));
-    sendMessageToDevices("rtc/startType", isFastReset() ? "fastRest" : "normal");
+    sendMessageToDevices("rtc/startType", isFastReset() ? "fastReset" : "normal");
+    incWakeupAmount(); 
 }
     
 Messages_t RTC::getMessages(const String& baseTopic) {
@@ -76,8 +77,9 @@ uint32_t RTC::getRtcTime() {
 }
 
 void RTC::initWakeupCounter(uint16_t startWakeupCounter) {
+    PRINT_IF_DEBUG("Initializing RTC ")
     uint32_t magicNumber = RTCMem<uint32_t>::read(MAGIC_NUMBER_ADDR);
-    PRINTLN_VARIABLE_IF_DEBUG(magicNumber)
+    PRINT_VARIABLE_IF_DEBUG(magicNumber)
     if (magicNumber != MAGIC_NUMBER) {
         PRINTLN_IF_DEBUG("Magic number does not match initializing RTC")
         RTCMem<uint32_t>::write(MAGIC_NUMBER_ADDR, MAGIC_NUMBER);
@@ -91,9 +93,8 @@ void RTC::initWakeupCounter(uint16_t startWakeupCounter) {
         }
     }
     _startType = RTCMem<uint32_t>::read(START_TYPE_ADDR);
-    PRINTLN_VARIABLE_IF_DEBUG(_startType)
+    PRINTLN_IF_DEBUG(_startType == FAST_RESET ? " Fast reset detected, permanent on." : " normal reset detected")
     RTCMem<uint32_t>::write(START_TYPE_ADDR, FAST_RESET);
-    PRINTLN_IF_DEBUG("Permanent active on next start, press reset to keep this mode")
 }
 
 
@@ -106,7 +107,7 @@ void RTC::setWakeupAmount(uint16_t wakeupAmount) {
     if (wakeupAmount != getWakeupAmount()) {
         RTCMem<uint16_t>::write(WAKEUP_COUNTER_ADDR, wakeupAmount);  
         RTCMem<uint32_t>::write(START_TYPE_ADDR, NORMAL_RESET);
-        PRINTLN_IF_DEBUG("Normal reset")
+        PRINTLN_IF_DEBUG(" Set next start type to normal reset")
     }
 }
 

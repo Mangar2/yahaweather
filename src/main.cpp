@@ -22,7 +22,7 @@
 
 #ifdef __BME
 #include <yahabme280.h>
-const uint16_t BME_I2C_ADDRESS = 0x76;
+const uint16_t BME_I2C_ADDRESS = 0x77;
 const uint8_t ACTIVATE_BME280_PIN = 14;
 #endif
 

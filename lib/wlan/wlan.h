@@ -33,52 +33,84 @@ public:
         /**
          * Gets the configuration as key/value map
          */
-        std::map<String, String> get()
-        {
-            std::map<String, String> result;
-            result["ssid"] = ssid;
-            result["password"] = password;
-            return result;
-        }
+        std::map<String, String> get();
 
         /**
          * Sets the configuration from a key/value map
          * @param config configuration settings in a map
          */
-        void set(std::map<String, String> config)
-        {
-            ssid = config["ssid"];
-            password = config["password"];
-            uuid = getUUID();
-        }
+        void set(std::map<String, String> config);
     };
+
+    /**
+     * Sets the battery configuration
+     */
+    virtual void setConfig(jsonObject_t& config) { 
+        _config.set(config); 
+    }
+
+    /**
+     * Gets the battery configuraiton
+     */
+    virtual jsonObject_t getConfig() { 
+        return _config.get();
+    }
+
+    /**
+     * Clears the configuration
+     */
+    void clear() { _config.clear(); }
+
+    /**
+     * Checks, if the WLAN configuration is initialized
+     * @returns true, if initialized
+     */
+    bool isInitialized() { return _config.isInitialized(); }
+
+    /**
+     * Writes the configuration to EEPROM
+     * @param EEPROMAddress EEPROM address to write to
+     * @returns EEPROM address for the next device
+     */
+    virtual uint16_t writeConfigToEEPROM(uint16_t EEPROMAddress);
+
+    /**
+     * Reads configuration from EEPROM
+     * @param EEPROMAddress EEPROM address to read from
+     * @returns EEPROM address for the next device
+     */
+    virtual uint16_t readConfigFromEEPROM(uint16_t EEPROMAddress);
+
+    /**
+     * Gets an info about the matching html page
+     */
+    HtmlPageInfo getHtmlPage() { return HtmlPageInfo(htmlForm, "/", "WLan"); }
 
     /**
      * Checks if the WLAN connection is established
      */
-    static bool isConnected();
+    bool isConnected();
 
     /**
      * connects to the wlan, if currently not connected
      */
-    static void reconnect();
+    void reconnect();
 
     /**
      * Connects to wlan, creates a station, if WLAN configuration is invalid
-     * @param configuration WLAN configuraiton object with ssid and password
      * @param softAPssid ssid of a station, if the WLAN connection is not available
     */
-    static bool connect(const Configuration& configuration, const String& softAPssid);
+    bool connect(const String& softAPssid);
 
     /**
      * Creates a station used for configuration purpouse
      */
-    static bool softAP(const String& ssid);
+    bool softAP(const String& ssid);
 
     /**
      * Disconnects from wlan
      */
-    static void disconnect();
+    void disconnect();
 
     /**
      * Gets the ip address of this device
@@ -98,10 +130,9 @@ private:
      * Internal connect function
      * Tries to connect to wlan, prints error codes on failure
      */
-    static bool connect();
+    bool connect();
 
-    static String _ssid;
-    static String _password;
+    Configuration _config;
 
 };
 

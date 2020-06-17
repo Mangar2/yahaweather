@@ -73,6 +73,16 @@ public:
     virtual uint16_t readConfigFromEEPROM(uint16_t EEPROMAddress);
 
     /**
+     * Gets an info about the matching html page
+     */
+    virtual HtmlPageInfo getHtmlPage() { return HtmlPageInfo(htmlForm, "/broker", "Broker"); }
+
+    /**
+     * Connect to the broker
+     */
+    virtual void setup() { connect(); }
+
+    /**
      * Connects to the yaha "near-mqtt" broker
      */
     void connect(const String& port = "80");
@@ -116,6 +126,8 @@ private:
      * @param headers list of headers
      */
     void sendToServer(String urlWithoutHost, String jsonBody, headers_t headers = headers_t()); 
+
+    static const char* htmlForm;
 
     Configuration _config;
     String _IPAddress;

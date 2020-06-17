@@ -27,7 +27,6 @@ public:
 
     RTC(uint16_t startWakeupCounter = 0) { 
         initWakeupCounter(startWakeupCounter); 
-        incWakeupAmount();
     }
 
     /**
@@ -41,11 +40,6 @@ public:
      * @returns a list of messages to send with topic, value and reason
      */
     virtual Messages_t getMessages(const String& baseTopic);
-
-    /**
-     * Runs in each loop
-     */
-    virtual void closedown() { incWakeupAmount(); }
 
     /**
      * Handles a message send to devices

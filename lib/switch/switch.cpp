@@ -15,23 +15,23 @@ const char* Switch::htmlForm =
     R"htmlform(
     <form action="/switch" method="POST">
     <label class="tb">D4, GPIO12</label>
-    <input type="hidden" name="D4" id="D4" value="toggle">
-    <input type="submit" class="tb" [value]="D4">
+    <input type="hidden" name="switch/D4" id="D4" value="toggle">
+    <input type="submit" class="tb" [value]="switch/D4">
     </form>
     <form action="/switch" method="POST">
     <label class="tb">D5, GPIO12</label>
-    <input type="hidden" name="D5" id="D5" value="toggle">
-    <input type="submit" class="tb" [value]="D5">
+    <input type="hidden" name="switch/D5" id="D5" value="toggle">
+    <input type="submit" class="tb" [value]="switch/D5">
     </form>            
     <form action="/switch" method="POST">
     <label class="tb">D6, GPIO12</label>
-    <input type="hidden" name="D6" id="D6" value="toggle">
-    <input type="submit" class="tb" [value]="D6">
+    <input type="hidden" name="switch/D6" id="D6" value="toggle">
+    <input type="submit" class="tb" [value]="switch/D6">
     </form>
     <form action="/switch" method="POST">
     <label class="tb">D7, GPIO13</label>
-    <input type="hidden" name="D7" id="D7" value="toggle">
-    <input type="submit" class="tb" [value]="D7">
+    <input type="hidden" name="switch/D7" id="D7" value="toggle">
+    <input type="submit" class="tb" [value]="switch/D7">
     </form>
     )htmlform";
 
@@ -54,22 +54,22 @@ void Switch::togglePin(uint8_t pin, String name, const jsonObject_t& config) {
     }
 }
 
-void Switch::setConfig(jsonObject_t config) {
-    togglePin(D4, "D4", config);
-    togglePin(D5, "D5", config);
-    togglePin(D6, "D6", config);
-    togglePin(D7, "D7", config);
-    togglePin(D8, "D8", config);
-    togglePin(D9, "D9", config);
-    togglePin(D10, "D10", config);
+void Switch::setConfig(jsonObject_t& config) {
+    togglePin(D4, "switch/D4", config);
+    togglePin(D5, "switch/D5", config);
+    togglePin(D6, "switch/D6", config);
+    togglePin(D7, "switch/D7", config);
+    togglePin(D8, "switch/D8", config);
+    togglePin(D9, "switch/D9", config);
+    togglePin(D10, "switch/D10", config);
 }
 
 jsonObject_t Switch::getConfig() {
     jsonObject_t result;
-    result["D4"] = digitalRead(D4) == HIGH ? "on" : "off";
-    result["D5"] = digitalRead(D5) == HIGH ? "on" : "off";
-    result["D6"] = digitalRead(D6) == HIGH ? "on" : "off";
-    result["D7"] = digitalRead(D7) == HIGH ? "on" : "off";
+    result["switch/D4"] = digitalRead(D4) == HIGH ? "on" : "off";
+    result["switch/D5"] = digitalRead(D5) == HIGH ? "on" : "off";
+    result["switch/D6"] = digitalRead(D6) == HIGH ? "on" : "off";
+    result["switch/D7"] = digitalRead(D7) == HIGH ? "on" : "off";
     return result;
 }
 

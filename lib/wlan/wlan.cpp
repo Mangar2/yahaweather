@@ -12,21 +12,51 @@
 #define __DEBUG
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
+#include <eepromaccess.h>
 #include "wlan.h"
 
-String WLAN::_ssid;
-String WLAN::_password;
 const char* WLAN::htmlForm = 
-    R"htmlwlan(
-    <form action="/wlan" method="POST">
-    <label for="ssid">Wlan name</label>
-    <input type="text" id="ssid" name="ssid" placeholder="ssid..." [value]="ssid">
-    <label for="passwd">Wlan Password</label>
-    <input type="password" id="passwd" name="password" placeholder="password...">
-    <input type="submit" value="Submit">
-    </form>
-    )htmlwlan";
+R"htmlwlan(
+<form action="/" method="POST">
+<label for="ssid">Wlan name</label>
+<input type="text" id="ssid" name="wlan/ssid" placeholder="ssid..." [value]="wlan/ssid">
+<label for="passwd">Wlan Password</label>
+<input type="password" id="passwd" name="wlan/password" placeholder="password...">
+<input type="submit" value="Submit">
+</form>
+)htmlwlan";
 
+/**
+ * Gets the configuration as key/value map
+ */
+std::map<String, String> WLAN::Configuration::get()
+{
+    std::map<String, String> result;
+    result["wlan/ssid"] = ssid;
+    result["wlan/password"] = password;
+    return result;
+}
+
+/**
+ * Sets the configuration from a key/value map
+ * @param config configuration settings in a map
+ */
+void WLAN::Configuration::set(std::map<String, String> config)
+{
+    ssid = config["wlan/ssid"];
+    password = config["wlan/password"];
+    uuid = getUUID();
+}
+
+uint16_t WLAN::writeConfigToEEPROM(uint16_t EEPROMAddress) {
+    EEPROMAccess::write(EEPROMAddress, (uint8_t*) &_config, sizeof(_config));
+    return EEPROMAddress + sizeof(_config);
+}
+
+uint16_t WLAN::readConfigFromEEPROM(uint16_t EEPROMAddress) { 
+    EEPROMAccess::read(EEPROMAddress, (uint8_t*) &_config, sizeof(_config));
+    return EEPROMAddress + sizeof(_config);
+}
 
 /**
  * Checks if the WLAN connection is established
@@ -44,15 +74,8 @@ void WLAN::reconnect() {
     }
 }
 
- bool WLAN::connect(const Configuration& configuration, const String& softAPssid) {
-     PRINTLN_VARIABLE_IF_DEBUG(configuration.uuid);
-     PRINTLN_VARIABLE_IF_DEBUG(configuration.ssid);
-     bool result = false;
-     if (configuration.isInitialized()) {
-        _ssid = configuration.ssid;
-        _password = configuration.password;
-        result = connect();
-     } 
+ bool WLAN::connect(const String& softAPssid) {
+     bool result = connect();
      if (!result) {
          softAP(softAPssid);
          delay(2000);
@@ -78,9 +101,11 @@ bool WLAN::connect() {
     uint8_t tries = 0;
     bool isConnectedToWLAN = false;
     WiFi.forceSleepWake();
-    PRINTLN_VARIABLE_IF_DEBUG(_ssid)
-    PRINTLN_VARIABLE_IF_DEBUG(_password)
-    WiFi.begin(_ssid, _password);
+    PRINT_IF_DEBUG("Connect to WLAN, ssid: ")
+    PRINT_IF_DEBUG(_config.ssid);
+    PRINT_IF_DEBUG(" password: ")
+    PRINTLN_IF_DEBUG(_config.password);
+    WiFi.begin(_config.ssid, _config.password);
     while (tries < MAX_TRIES && WiFi.status() != WL_CONNECTED) {
         delay(200);
         PRINT_IF_DEBUG(".");
@@ -95,7 +120,7 @@ bool WLAN::connect() {
             break;
         case WL_NO_SSID_AVAIL:
             PRINT_IF_DEBUG("SSID unknown: ");
-            PRINTLN_IF_DEBUG(_ssid);
+            PRINTLN_IF_DEBUG(_config.ssid);
             break;
         case WL_CONNECT_FAILED: 
             PRINTLN_IF_DEBUG("Invalid password");

@@ -14,8 +14,6 @@
 #include "htmlstructure.h"
 #include "htmlstyle.h"
 #include "css.h"
-#include "htmlbrokerform.h"
-#include "htmlclientform.h"
 #include "htmltopnav.h"
 
 String htmlPage = 

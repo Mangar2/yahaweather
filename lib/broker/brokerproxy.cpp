@@ -9,6 +9,7 @@
  * Provides a class to connect to WLAN
  */
 
+#define __DEBUG
 #include <Arduino.h>
 #include <debug.h>
 #include <eepromaccess.h>
@@ -31,22 +32,38 @@ BrokerProxy::Configuration::Configuration() {
 std::map<String, String> BrokerProxy::Configuration::get()
 {
     std::map<String, String> result;
-    result["brokerHost"] = brokerHost;
-    result["brokerPort"] = brokerPort;
-    result["clientName"] = clientName;
-    result["baseTopic"] = baseTopic;
-    result["subscribeTo"] = subscribeTo;
+    result["broker/host"] = brokerHost;
+    result["broker/port"] = brokerPort;
+    result["broker/clientName"] = clientName;
+    result["broker/baseTopic"] = baseTopic;
+    result["broker/subscribeTo"] = subscribeTo;
     return result;
 }
 
 void BrokerProxy::Configuration::set(jsonObject_t& config)
 {
-    brokerHost = config["brokerHost"];
-    brokerPort = config["brokerPort"];
-    clientName = config["clientName"];
-    baseTopic = config["baseTopic"];
-    subscribeTo = config["subscribeTo"];
+    brokerHost = config["broker/host"];
+    brokerPort = config["broker/port"];
+    clientName = config["broker/clientName"];
+    baseTopic = config["broker/baseTopic"];
+    subscribeTo = config["broker/subscribeTo"];
 }
+
+const char* BrokerProxy::htmlForm = R"htmlform(
+    <form action="/broker" method="POST">
+    <label for="brokerhost">Broker host</label>
+    <input type="text" id="brokerhost" name="broker/host" placeholder="Broker host..." [value]="broker/host">
+    <label for="brokerport">Broker port</label>
+    <input type="number" id="brokerport" name="broker/port" [value]="broker/port">
+    <label for="clientname">Client name</label>
+    <input type="text" id="clientname" name="broker/clientName" [value]="broker/clientName">
+    <label for="basetopic">Base topic</label>
+    <input type="text" id="basetopic" name="broker/baseTopic" [value]="broker/baseTopic">
+    <label for="subscribeto">Subscribe topic</label>
+    <input type="text" id="subscribeto" name="broker/subscribeTo" [value]="broker/subscribeTo">
+    <input type="submit" value="Submit">
+    </form>
+    )htmlform";
 
 uint16_t BrokerProxy::writeConfigToEEPROM(uint16_t EEPROMAddress) {
     EEPROMAccess::write(EEPROMAddress, (uint8_t*) &_config, sizeof(_config));

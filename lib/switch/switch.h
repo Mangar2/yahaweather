@@ -30,7 +30,7 @@ public:
      * Sets the configuration from a key/value map
      * @param config configuration settings in a map
      */
-    virtual void setConfig(jsonObject_t config);
+    virtual void setConfig(jsonObject_t& config);
 
     /**
      * Gets messages to send

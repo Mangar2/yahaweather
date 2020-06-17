@@ -26,10 +26,10 @@ void YahaBME280::init(uint16_t bmeWireAddress)
 {
     // Wire.begin();
     _bmeAvailable = bme.begin(bmeWireAddress);
-
+    PRINT_IF_DEBUG("Initializing BME280 ... ")
     if (!_bmeAvailable)
     {
-        PRINT_IF_DEBUG("Could not find a valid sensor; Sensor-ID: ");
+        PRINT_IF_DEBUG("could not find a valid sensor; Sensor-ID: ");
         PRINT_IF_DEBUG(bme.sensorID())
         PRINTLN_IF_DEBUG()
         IF_DEBUG(ScanI2CBus();)
@@ -67,7 +67,7 @@ HtmlPageInfo YahaBME280::getHtmlPage() {
         <input type="text" id="voltage" readonly [value]="battery/voltage">
         </form>
         )htmlweather",
-        "/",
+        "/weather",
         "Weather"
     );
 }
@@ -115,6 +115,7 @@ void YahaBME280::ScanI2CBus()
         if (error == 0)
         {
             printScanInfo("I2C device found at address", address);
+            nDevices++;
         }
         else if (error == 4)
         {

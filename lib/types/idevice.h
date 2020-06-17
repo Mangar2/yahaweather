@@ -21,7 +21,7 @@ public:
      * Sets configuration from a key/value map
      * @param config map containing the configuration
      */
-    virtual void setConfig(jsonObject_t config) {};
+    virtual void setConfig(jsonObject_t& config) {};
     
     /**
      * Gets configuration as key/value map

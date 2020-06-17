@@ -44,7 +44,7 @@ const char* Irrigation::htmlForm =
     R"htmlform(
     <form action="/irrigation" method="POST">
     <label for="Humidity">Current humidity</label>
-    <input type="text" id="Humidity" name="humidity" [value]="humidity">
+    <input type="text" id="Humidity" [value]="sensor/humidity">
 
     <label for="lowDuration">Low humidity irrigation duration in seconds (30% rH)</label>
     <input type="text" id="lowDuration" name="irrigation/lowDurationInSeconds" [value]="irrigation/lowDurationInSeconds">
@@ -52,7 +52,7 @@ const char* Irrigation::htmlForm =
     <input type="text" id="lowWakeup" name="irrigation/lowWakeup" [value]="irrigation/lowWakeup">
 
     <label for="highDuration">High humidity irrigation duration in seconds (60% rH)</label>
-    <input type="text" id="highDuration" name="irrigation/hightDurationInSeconds" [value]="irrigation/hightDurationInSeconds">
+    <input type="text" id="highDuration" name="irrigation/highDurationInSeconds" [value]="irrigation/highDurationInSeconds">
     <label for="highWakeup">High humidity amount of wakeups until irrigation (60% rH)</label>
     <input type="text" id="highWakeup" name="irrigation/highWakeup" [value]="irrigation/highWakeup">
 
@@ -74,12 +74,6 @@ Irrigation::Irrigation(uint8_t pump1Pin, uint8_t pump2Pin)
     digitalWrite(pump2Pin, LOW); 
     pinMode(pump1Pin, OUTPUT); 
     pinMode(pump2Pin, OUTPUT); 
-    PRINTLN_VARIABLE_IF_DEBUG(pump1Pin);
-    PRINTLN_IF_DEBUG("test high")
-    digitalWrite(pump1Pin, HIGH);
-    delay(2000);
-    digitalWrite(pump1Pin, LOW);
-    PRINTLN_IF_DEBUG("test low")
 };
 
 Messages_t Irrigation::getMessages(const String& baseTopic) {
@@ -101,7 +95,7 @@ Messages_t Irrigation::getMessages(const String& baseTopic) {
     return result;
 }
 
-void Irrigation::setConfig(jsonObject_t config) { 
+void Irrigation::setConfig(jsonObject_t& config) { 
     _config.set(config); 
 };
 
@@ -118,12 +112,8 @@ uint16_t Irrigation::readConfigFromEEPROM(uint16_t EEPROMAddress) {
 void Irrigation::handleMessage(const String& key, const String& value) {
     if (key == "sensor/humidity") { 
         _humidity = value.toFloat();
-        PRINT_IF_DEBUG("Irrigation received:  ")
-        PRINTLN_VARIABLE_IF_DEBUG(_humidity)
     } else if (key == "rtc/wakeupAmount") {
         _wakeupAmount = value.toInt();
-        PRINT_IF_DEBUG("Irrigation received:  ")
-        PRINTLN_VARIABLE_IF_DEBUG(_wakeupAmount)
     }
 }
 
@@ -164,7 +154,5 @@ bool Irrigation::doIrrigation() {
     float wakeupDifference = _config.highWakeup - _config.lowWakeup;
     float relativeWakeup = wakeupDifference / humidityDifference;
     uint16_t neededWakeupAmount = (_humidity - 30) * relativeWakeup + _config.lowWakeup;
-    PRINTLN_VARIABLE_IF_DEBUG(_wakeupAmount)
-    PRINTLN_VARIABLE_IF_DEBUG(neededWakeupAmount)
     return _wakeupAmount >= neededWakeupAmount;
 }
