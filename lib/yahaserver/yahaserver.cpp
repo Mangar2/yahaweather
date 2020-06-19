@@ -50,18 +50,16 @@ void YahaServer::closeDown() {
         device->closeDown();
     }
     if (wlan.isConnected()) {
-        delay(500);
         wlan.disconnect(); 
     }
-    String message = "\nDisconnected from WiFi, going to sleep for " + String(_sleepTimeInSeconds) + " seconds ...";
-    PRINTLN_IF_DEBUG(message)
+    PRINTLN_IF_DEBUG("\nDisconnected from WiFi, going to sleep for " + String(_sleepTimeInSeconds) + " seconds ...")
     IF_DEBUG(delay(100);)
     ESP.deepSleep(_sleepTimeInSeconds * DEEP_SLEEP_ONE_SECOND); 
 }
 
 void YahaServer::loop() {
     if (wlan.isConnected()) {
-        for (uint16_t i = 0; i < 30; i++) {
+        for (uint16_t i = 0; i < 50; i++) {
             MQTTServer::handleClient();
             delay(10);
         }

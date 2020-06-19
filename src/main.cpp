@@ -10,9 +10,10 @@
  */
 
 #define __DEBUG
-#define __BME
-#define __IRRIGATION
-#define __SWITCH
+// #define __BME
+// #define __IRRIGATION
+// #define __SWITCH
+#define __MOTION
 
 #include <vector>
 #include <debug.h>
@@ -32,6 +33,10 @@ const uint8_t ACTIVATE_BME280_PIN = 14;
 
 #ifdef __SWITCH
 #include <switch.h>
+#endif
+
+#ifdef __MOTION
+#include <motion.h>
 #endif
 
 const uint32_t SERIAL_SPEED = 115200;
@@ -55,6 +60,9 @@ void setup() {
     #endif
     #ifdef __SWITCH
     server.addDevice(new Switch());
+    #endif
+    #ifdef __MOTION
+    server.addDevice(new Motion());
     #endif
     server.setup(STATION_NAME);
 }

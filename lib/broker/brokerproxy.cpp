@@ -95,7 +95,7 @@ void BrokerProxy::sendToServer(String urlWithoutHost, String jsonBody, headers_t
 
     IF_DEBUG(uint16_t httpCode =) http.PUT(jsonBody);
     PRINT_VARIABLE_IF_DEBUG(httpCode);
-    IF_DEBUG(http.writeToStream(&Serial);)
+    // IF_DEBUG(http.writeToStream(&Serial);)
     PRINTLN_IF_DEBUG("");
     http.end();
     delay(10);
@@ -116,9 +116,11 @@ void BrokerProxy::connect(const String& port) {
 }
 
 void BrokerProxy::disconnect() {
+    PRINTLN_IF_DEBUG("BrokerProxy::disconnect()")
     String body = "{" + jsonStringProperty("clientId", _config.clientName) + "}";
     String urlWithoutHost = "/disconnect";
     sendToServer(urlWithoutHost, body);
+    PRINTLN_IF_DEBUG("BrokerProxy::disconnect() finished")
 }
 
 void BrokerProxy::subscribe(String topic, uint8_t qos) {
