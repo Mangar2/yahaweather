@@ -22,11 +22,11 @@
 
 
 BrokerProxy::Configuration::Configuration() {
-    brokerHost = "192.168.1.1";
+    brokerHost = "192.168.0.1";
     brokerPort = "8183";
-    clientName = "ESP8266/Weather/Station";
-    baseTopic = "outdoor/garden/main/weather"; 
-    subscribeTo = "outdoor/garden/main/weather/+/set";
+    clientName = "ESP8266/yourstation";
+    baseTopic = "area/level/room/device"; 
+    subscribeTo = "";
 }
 
 std::map<String, String> BrokerProxy::Configuration::get()
@@ -112,7 +112,10 @@ void BrokerProxy::connect(const String& port) {
         jsonStringProperty("keepAlive", "100") + "}";
     String urlWithoutHost = "/connect";
     sendToServer(urlWithoutHost, body);
-    subscribe(_config.subscribeTo, 1);
+    subscribe(String(_config.baseTopic) + "/+/+/set", 1);
+    if (_config.subscribeTo != "") {
+        subscribe(_config.subscribeTo, 1);
+    } 
 }
 
 void BrokerProxy::disconnect() {

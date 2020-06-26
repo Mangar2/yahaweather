@@ -75,8 +75,11 @@ public:
 
     
     /**
-     * Sets battery mode on fast reset
-     * @param config all relevant data
+     * Stores messages important for irrigation
+     * sensor/humidity the current humidity
+     * rtc/wakeupAmount the amount of wakeups since last irrigation
+     * @param key message identifier
+     * @param value message value
      */
     virtual void handleMessage(const String& key, const String& value);
 

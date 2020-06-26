@@ -28,10 +28,13 @@ Motion::Motion(){
     motion3 = digitalRead(D7) == HIGH;
 }
 
-void Motion::setup() {
-    attachInterrupt(digitalPinToInterrupt(D5), motionD5, RISING);
-    attachInterrupt(digitalPinToInterrupt(D6), motionD6, RISING);
-    attachInterrupt(digitalPinToInterrupt(D7), motionD7, RISING);
+void Motion::handleMessage(const String& key, const String& value) {
+    if (key == "battery/mode" && value == "0") { 
+        PRINTLN_IF_DEBUG("Attach interrupt functions to detect motion changes")
+        attachInterrupt(digitalPinToInterrupt(D5), motionD5, RISING);
+        attachInterrupt(digitalPinToInterrupt(D6), motionD6, RISING);
+        attachInterrupt(digitalPinToInterrupt(D7), motionD7, RISING);
+    }
 }
 
 Messages_t Motion::getMessages(const String& baseTopic) {

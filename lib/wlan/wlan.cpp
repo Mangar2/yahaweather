@@ -85,6 +85,7 @@ void WLAN::reconnect() {
 
 void WLAN::disconnect() {
     WiFi.disconnect();
+    delay(1);
     //WiFi.softAPdisconnect(wifioff)
 }
 
@@ -101,6 +102,8 @@ bool WLAN::connect() {
     uint8_t tries = 0;
     bool isConnectedToWLAN = false;
     WiFi.forceSleepWake();
+    delay(1);
+    WiFi.persistent(false);
     PRINT_IF_DEBUG("Connect to WLAN, ssid: ")
     PRINT_IF_DEBUG(_config.ssid);
     PRINT_IF_DEBUG(" password: ")
