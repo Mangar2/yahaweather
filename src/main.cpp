@@ -10,10 +10,10 @@
  */
 
 #define __DEBUG
-// #define __BME
-// #define __IRRIGATION
-// #define __SWITCH
-#define __MOTION
+#define __BME
+#define __IRRIGATION
+#define __SWITCH
+// #define __MOTION
 
 #include <vector>
 #include <debug.h>
@@ -23,7 +23,7 @@
 
 #ifdef __BME
 #include <yahabme280.h>
-const uint16_t BME_I2C_ADDRESS = 0x77;
+const uint16_t BME_I2C_ADDRESS = 0x76;
 const uint8_t ACTIVATE_BME280_PIN = 14;
 #endif
 
@@ -40,7 +40,7 @@ const uint8_t ACTIVATE_BME280_PIN = 14;
 #endif
 
 const uint32_t SERIAL_SPEED = 115200;
-const char* STATION_NAME = "YahaIrrigation";
+const char* STATION_NAME = "YahaStation";
 
 YahaServer server;
 

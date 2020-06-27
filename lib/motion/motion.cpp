@@ -15,14 +15,17 @@ bool Motion::motion1;
 bool Motion::motion2;
 bool Motion::motion3;
 
-void ICACHE_RAM_ATTR motionD5() { PRINTLN_IF_DEBUG("Motion 1 detected"); Motion::motion1 = true; }
-void ICACHE_RAM_ATTR motionD6() { PRINTLN_IF_DEBUG("Motion 2 detected"); Motion::motion2 = true; }
-void ICACHE_RAM_ATTR motionD7() { PRINTLN_IF_DEBUG("Motion 3 detected"); Motion::motion3 = true; }
+void ICACHE_RAM_ATTR motionD5() { Motion::motion1 = true; }
+void ICACHE_RAM_ATTR motionD6() { Motion::motion2 = true; }
+void ICACHE_RAM_ATTR motionD7() { Motion::motion3 = true; }
 
 Motion::Motion(){
     pinMode(D5, INPUT); 
     pinMode(D6, INPUT); 
     pinMode(D7, INPUT); 
+    attachInterrupt(digitalPinToInterrupt(D5), motionD5, RISING);
+    attachInterrupt(digitalPinToInterrupt(D6), motionD6, RISING);
+    attachInterrupt(digitalPinToInterrupt(D7), motionD7, RISING);
     motion1 = digitalRead(D5) == HIGH;
     motion2 = digitalRead(D6) == HIGH;
     motion3 = digitalRead(D7) == HIGH;

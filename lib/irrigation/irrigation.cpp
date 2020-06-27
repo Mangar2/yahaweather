@@ -122,9 +122,15 @@ uint16_t Irrigation::getIrrigationDurationInSeconds(uint8_t pumpNo) {
     float humidityDifference = 60 - 30;
     float irrigationDifference = _config.highDurationInSeconds - _config.lowDurationInSeconds;
     float relativeIrrigation = irrigationDifference / humidityDifference;
-    uint16_t duration = (_humidity - 30) * relativeIrrigation + _config.lowDurationInSeconds;
+    float duration = (_humidity - 30) * relativeIrrigation + _config.lowDurationInSeconds;
     if (pumpNo == 2) {
         duration *= _config.pump2Factor;
+    }
+    if (duration < 0) {
+        duration = 0;
+    }
+    if (duration > 3600) {
+        duration = 3600;
     }
     return duration;
 }

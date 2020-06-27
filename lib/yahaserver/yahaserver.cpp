@@ -74,7 +74,7 @@ void YahaServer::loop() {
     for (auto const& device: _devices) {
         device->run();
     }
-    if (_isBatteryMode) {
+    if (_isBatteryMode || _sleepTimeInSeconds == 0) {
         closeDown();
     } else {
         for (uint16_t i = 0; i < 5000; i++) {

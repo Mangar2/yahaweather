@@ -141,6 +141,8 @@ void BrokerProxy::subscribe(String topic, uint8_t qos) {
         ) + "}";
         
     String urlWithoutHost = "/subscribe";
+    PRINT_IF_DEBUG("Subscribe: ")
+    PRINTLN_IF_DEBUG(body)
     sendToServer(urlWithoutHost, body);
 }
 
