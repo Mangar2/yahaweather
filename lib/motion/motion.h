@@ -24,15 +24,6 @@ public:
      */
     virtual Messages_t getMessages(const String &baseTopic);
 
-
-    /**
-     * Check for battery mode. If not in battery mode we will add interrupt functions to 
-     * register motion changes. In battery mode motion information is only collected directly after start
-     * @param key message identifier
-     * @param value message value
-     */
-    virtual void handleMessage(const String& key, const String& value);
-
     static bool motion1;
     static bool motion2;
     static bool motion3;

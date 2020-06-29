@@ -43,6 +43,7 @@ void Battery::Configuration::set(std::map<String, String> config)
     normalVoltageSleepTimeInSeconds = config["battery/normalVoltageSleepTimeInSeconds"].toFloat();
     highVoltage = config["battery/highVoltage"].toFloat();
     lowVoltage = config["battery/lowVoltage"].toFloat();
+    PRINTLN_VARIABLE_IF_DEBUG(config["battery/mode"])
     batteryMode = config["battery/mode"] == "on" ? 1 : 0;
 }
 

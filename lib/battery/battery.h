@@ -116,11 +116,11 @@ private:
     static const char* htmlForm;
 
     /**
-     * @returns true, if battery mode is activated
+     * @param mode true, to set battery mode on
      */
     void setBatteryMode(bool mode) {
         _config.batteryMode = mode ? 1 : 0;
-        sendMessageToDevices("battery/mode", String(_config.batteryMode));
+        sendMessageToDevices("battery/mode", _config.batteryMode ? "on": "off");
     }
 
     /**

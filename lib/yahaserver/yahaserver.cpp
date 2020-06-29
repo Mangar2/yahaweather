@@ -23,7 +23,7 @@ void YahaServer::sendMessageToDevices(const String& key, const String& value) {
     }
     MQTTServer::setData(key, value);
     if (key == "battery/mode") {
-        _isBatteryMode = value == "1";
+        _isBatteryMode = value == "on";
     }
     if (key == "battery/sleepTimeInSeconds") {
         _sleepTimeInSeconds = value.toInt();
@@ -59,13 +59,15 @@ void YahaServer::closeDown() {
 
 void YahaServer::loop() {
     if (wlan.isConnected()) {
+        for(auto const& device: _devices) {
+            brokerProxy.publishMessages(device->getMessages(brokerProxy.getBaseTopic()));
+        }
+        PRINT_IF_DEBUG("Waiting for broker to send messages, ... ")
         for (uint16_t i = 0; i < 50; i++) {
             MQTTServer::handleClient();
             delay(10);
         }
-        for(auto const& device: _devices) {
-            brokerProxy.publishMessages(device->getMessages(brokerProxy.getBaseTopic()));
-        }
+        PRINTLN_IF_DEBUG(" Done")
         if (MQTTServer::isChanged()) {
             brokerProxy.publishMessages(MQTTServer::getMessages(brokerProxy.getBaseTopic()));
             MQTTServer::setChanged(false);
@@ -93,13 +95,13 @@ void YahaServer::setDeviceConfigFromJSON(jsonObject_t& config) {
 
 void YahaServer::updateConfig(jsonObject_t config) {
     PRINTLN_IF_DEBUG("update Configuration")
+
     uint16_t EEPROMAddress = EEPROM_START_ADDR;
 
     for (auto const& device: _devices) {
         device->setConfig(config);
         EEPROMAddress = device->writeConfigToEEPROM(EEPROMAddress);
     }
-        
     EEPROMAccess::commit();
     PRINTLN_IF_DEBUG("Configuration committed")
 }

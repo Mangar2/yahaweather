@@ -95,7 +95,6 @@ void MQTTServer::on(const String& uri) {
         }
         handler();
         String form = createForm(uri);
-        // $SYS/ESP8266/weather
         _httpServer->send(200, "text/html", form);
     });
 }

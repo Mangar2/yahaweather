@@ -73,9 +73,11 @@ HtmlPageInfo YahaBME280::getHtmlPage() {
 }
 
 void YahaBME280::run() {
-    sendMessageToDevices("sensor/temperature", String(bme.readTemperature()));
-    sendMessageToDevices("sensor/humidity", String(bme.readHumidity()));
-    sendMessageToDevices("sensor/pressure", String(bme.readPressure()));
+    if (isValid()) {
+        sendMessageToDevices("sensor/temperature", String(bme.readTemperature()));
+        sendMessageToDevices("sensor/humidity", String(bme.readHumidity()));
+        sendMessageToDevices("sensor/pressure", String(bme.readPressure()));
+    }
 }
 
 Messages_t YahaBME280::getMessages(const String& baseTopic) {

@@ -85,7 +85,7 @@ void WLAN::reconnect() {
 
 void WLAN::disconnect() {
     WiFi.disconnect();
-    delay(1);
+    delay(50);
     //WiFi.softAPdisconnect(wifioff)
 }
 
