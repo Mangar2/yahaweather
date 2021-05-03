@@ -15,7 +15,6 @@
 #include <map>
 #include <message.h>
 #include <htmlpageinfo.h>
-#include "json.h"
 
 typedef std::function<void(std::map<String, String>&)> TOnUpdateFunction;
 typedef std::function<void()> THandlerFunction;

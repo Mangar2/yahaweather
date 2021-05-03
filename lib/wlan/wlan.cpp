@@ -89,12 +89,13 @@ void WLAN::disconnect() {
     //WiFi.softAPdisconnect(wifioff)
 }
 
-bool WLAN::softAP(const String& ssid) {
-    PRINTLN_IF_DEBUG("Sett up Wifi station in soft ap mode, IP: 192.168.4.1, ssid: " + ssid + " password: admin")
-    
-    bool station = WiFi.softAP(ssid, "admin");
-    PRINTLN_VARIABLE_IF_DEBUG(station)
-    return station;
+bool WLAN::softAP(const String ssid, const String password) {
+
+    PRINTLN_IF_DEBUG("Sett up Wifi station in soft ap mode, IP: 192.168.4.1, ssid: " + ssid + " password: " + password)
+    bool success = WiFi.softAP(ssid, password);
+    PRINTLN_VARIABLE_IF_DEBUG(success)
+    return success;
+
 }
 
 

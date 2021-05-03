@@ -42,6 +42,7 @@ public:
 void RTC::setup() {
     sendMessageToDevices("rtc/wakeupAmount", String(getWakeupAmount()));
     sendMessageToDevices("rtc/startType", isFastReset() ? "fastReset" : "normal");
+    sendMessageToDevices("rtc/isPowerOn", _isPowerOn ? "true" : "false");
     incWakeupAmount(); 
 }
     
@@ -80,6 +81,7 @@ void RTC::initWakeupCounter(uint16_t startWakeupCounter) {
     PRINT_IF_DEBUG("Initializing RTC ")
     uint32_t magicNumber = RTCMem<uint32_t>::read(MAGIC_NUMBER_ADDR);
     PRINT_VARIABLE_IF_DEBUG(magicNumber)
+    _isPowerOn = false;
     if (magicNumber != MAGIC_NUMBER) {
         PRINTLN_IF_DEBUG("Magic number does not match initializing RTC")
         RTCMem<uint32_t>::write(MAGIC_NUMBER_ADDR, MAGIC_NUMBER);
@@ -90,6 +92,7 @@ void RTC::initWakeupCounter(uint16_t startWakeupCounter) {
             PRINTLN_IF_DEBUG("Fatal cannot write to RTCMem")
         } else {
             setWakeupAmount(startWakeupCounter);
+            _isPowerOn = true;
         }
     }
     _startType = RTCMem<uint32_t>::read(START_TYPE_ADDR);

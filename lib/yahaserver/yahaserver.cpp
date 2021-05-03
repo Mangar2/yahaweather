@@ -28,6 +28,9 @@ void YahaServer::sendMessageToDevices(const String& key, const String& value) {
     if (key == "battery/sleepTimeInSeconds") {
         _sleepTimeInSeconds = value.toInt();
     }
+    if (key == "rtc/isPowerOn") {
+        _isPowerOn = value == "true";
+    }
 }
 
 void YahaServer::setup(const String stationSSID) {
@@ -76,7 +79,8 @@ void YahaServer::loop() {
     for (auto const& device: _devices) {
         device->run();
     }
-    if (_isBatteryMode || _sleepTimeInSeconds == 0) {
+    bool noWLANAfterPowerOn = _isPowerOn && !wlan.isConnected();
+    if (!noWLANAfterPowerOn && (_isBatteryMode || _sleepTimeInSeconds == 0)) {
         closeDown();
     } else {
         for (uint16_t i = 0; i < 5000; i++) {

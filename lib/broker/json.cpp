@@ -9,6 +9,8 @@
 * Provides a class to connect to WLAN
 */
 
+#define __DEBUG
+#include "debug.h"
 #include "json.h"
 #include "jsontokenizer.h"
 
@@ -175,15 +177,15 @@ bool JSON::searchArrayElement(JSONTokenizer& json, uint16_t index) const {
 * @param path string in json path format
 */
 String JSON::getElementRec(JSONTokenizer& json, JSONTokenizer& path) const {
-	String tk = path.getNextToken();
+	String pathChunk = path.getNextToken();
 	String result = "";
-	if (tk == ".") {
-		tk = path.getNextToken();
+	if (pathChunk == ".") {
+		pathChunk = path.getNextToken();
 	}
-	if (tk == "") {
+	if (pathChunk == "") {
 		result = getNextObject(json);
 	}
-	else if (tk == "[") {
+	else if (pathChunk == "[") {
 		String indexString = path.getNextToken();
 		uint16_t index = indexString.toInt();
 		path.skipExpectedToken("]");
@@ -192,7 +194,7 @@ String JSON::getElementRec(JSONTokenizer& json, JSONTokenizer& path) const {
 		}
 	}
 	else {
-		if (searchPropertyInObject(json, tk)) {
+		if (searchPropertyInObject(json, pathChunk)) {
 			result = getElementRec(json, path);
 		}
 	}

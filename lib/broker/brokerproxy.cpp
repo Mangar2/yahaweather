@@ -75,7 +75,7 @@ uint16_t BrokerProxy::readConfigFromEEPROM(uint16_t EEPROMAddress) {
     return EEPROMAddress + sizeof(_config);
 }
 
-void BrokerProxy::sendToServer(String urlWithoutHost, String jsonBody, headers_t headers) {
+String BrokerProxy::sendToServer(String urlWithoutHost, String jsonBody, headers_t headers) {
     WiFiClient client;
     HTTPClient http;
     String url = String("http://") + _config.brokerHost + ":" + _config.brokerPort + urlWithoutHost;
@@ -89,19 +89,36 @@ void BrokerProxy::sendToServer(String urlWithoutHost, String jsonBody, headers_t
     http.begin(client, url);
     http.addHeader("Content-Type", "application/json");
     http.addHeader("cache-control", "no-cache");
+    http.addHeader("version", "1.0");
     for (auto const& header: headers) {
         http.addHeader(header.first, header.second);
     }
 
-    IF_DEBUG(uint16_t httpCode =) http.PUT(jsonBody);
-    PRINT_VARIABLE_IF_DEBUG(httpCode);
-    // IF_DEBUG(http.writeToStream(&Serial);)
-    PRINTLN_IF_DEBUG("");
+    uint16_t httpCode = http.PUT(jsonBody);
+    PRINTLN_VARIABLE_IF_DEBUG(httpCode);
+    String response = http.getString();
+
+    if (httpCode != 204) {
+        PRINTLN_VARIABLE_IF_DEBUG(response)
+    }
+
     http.end();
     delay(10);
+    return response;
+}
+
+void BrokerProxy::storeToken(const String& response) {
+    JSON jsonResponse(response);
+    _sendToken = jsonResponse.getElement("token.send");
+    _receiveToken = jsonResponse.getElement("token.receive");
+    PRINTLN_VARIABLE_IF_DEBUG(_sendToken)
+    PRINTLN_VARIABLE_IF_DEBUG(_receiveToken)
 }
 
 void BrokerProxy::connect(const String& port) {
+    if (!WLAN::isConnected()) {
+        return;
+    }
     String host = WLAN::getLocalIP();
     String body = "{" + 
         jsonStringProperty("clientId", _config.clientName) + "," + 
@@ -109,9 +126,10 @@ void BrokerProxy::connect(const String& port) {
         jsonStringProperty("host", host) + "," + 
         jsonStringProperty("port", port) + "," +
         jsonStringProperty("clean", "false") + "," + 
-        jsonStringProperty("keepAlive", "100") + "}";
+        jsonStringProperty("keepAlive", "100000") + "}";
     String urlWithoutHost = "/connect";
-    sendToServer(urlWithoutHost, body);
+    String response = sendToServer(urlWithoutHost, body);
+    storeToken(response);
     subscribe(String(_config.baseTopic) + "/+/+/set", 1);
     if (_config.subscribeTo != "") {
         subscribe(_config.subscribeTo, 1);
@@ -131,19 +149,20 @@ void BrokerProxy::subscribe(String topic, uint8_t qos) {
         jsonStringProperty("clientId", _config.clientName) + "," + 
         jsonObjectProperty("subscribe", "{" + 
             jsonStringProperty("QoS", String(qos)) + "," + 
-            jsonStringProperty("topics", topic) + "}")
+            jsonStringProperty("topics", topic) 
+            + "}")
         + "}";
 
     String bodyV1 = "{" +
         jsonStringProperty("clientId", _config.clientName) + "," + 
         jsonObjectProperty("subscribe", "{" + 
-            jsonStringProperty(topic, String(qos))
-        ) + "}";
+            jsonStringProperty(topic, String(qos)) + "}" )
+        + "}";
         
     String urlWithoutHost = "/subscribe";
     PRINT_IF_DEBUG("Subscribe: ")
-    PRINTLN_IF_DEBUG(body)
-    sendToServer(urlWithoutHost, body);
+    PRINTLN_IF_DEBUG(bodyV1)
+    sendToServer(urlWithoutHost, bodyV1);
 }
 
 void BrokerProxy::publishMessage(const Message& message, bool retain) {
@@ -151,7 +170,6 @@ void BrokerProxy::publishMessage(const Message& message, bool retain) {
     String urlWithoutHost = "/publish";
     headers_t headers;
     headers["qos"] = "0";
-    headers["version"] = "1.0";
     headers["retain"] = retain ? "1" : "0";
     sendToServer(urlWithoutHost, body, headers);
 }

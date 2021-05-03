@@ -129,13 +129,22 @@ private:
      * @param urlWithoutHost url 
      * @param jsonBody body of the message in json format
      * @param headers list of headers
+     * @returns answer string
      */
-    void sendToServer(String urlWithoutHost, String jsonBody, headers_t headers = headers_t()); 
+    String sendToServer(String urlWithoutHost, String jsonBody, headers_t headers = headers_t()); 
+
+    /**
+     * Stores the token from a connect response string
+     * @param response response of a connect call { ... "token": { "send": "send_token", "receive": "receive_token"}}
+     */
+    void storeToken(const String& response);
 
     static const char* htmlForm;
 
     Configuration _config;
     String _IPAddress;
     String _port;
+    String _sendToken;
+    String _receiveToken;
 
 };

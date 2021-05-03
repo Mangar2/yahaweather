@@ -22,7 +22,7 @@
 
 class YahaServer : public IMessageBroker {
 public:
-    YahaServer() : _isBatteryMode(true) {
+    YahaServer() : _isBatteryMode(true), _isPowerOn(false) {
         MQTTServer::registerOnUpdateFunction(updateConfig);
         addDevice(&wlan);
         addDevice(&brokerProxy);
@@ -77,6 +77,7 @@ private:
     static std::vector<IDevice*> _devices;
 
     bool _isBatteryMode;
+    bool _isPowerOn;
     uint16_t _sleepTimeInSeconds;
     Runtime _runtime;
 

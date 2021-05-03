@@ -13,6 +13,7 @@
 #include "debug.h"
 #include "mqttserver.h"
 #include "htmlpages.h"
+#include "json.h"
 
 ESP8266WebServer* MQTTServer::_httpServer = 0;
 TOnUpdateFunction MQTTServer::_onUpdateFunction = 0;
@@ -26,20 +27,28 @@ void MQTTServer::onPublish() {
     PRINTLN_IF_DEBUG("Received PUT publish command body:");
     PRINTLN_IF_DEBUG(postBody);
     JSON json(postBody);
-    String topic = json.getElement("topic");
-    String value = json.getElement("value");
+    String topic = json.getElement("message.topic");
+    PRINTLN_VARIABLE_IF_DEBUG(topic)
+    String value = json.getElement("message.value");
+    PRINTLN_VARIABLE_IF_DEBUG(value)
     topic.replace("/set", "");
     uint16_t lastChunkStart = topic.lastIndexOf("/");
     uint16_t secondLastChungStart = topic.lastIndexOf("/", lastChunkStart - 1);
     String propertyName = topic.substring(secondLastChungStart + 1);
     setData(propertyName, value);
     _onUpdateFunction(_data);
-    String id = _httpServer->header("id");
+    for (uint16_t i = 0; i < _httpServer->headers(); i++) {
+        PRINT_IF_DEBUG(_httpServer->headerName(i))
+        PRINT_IF_DEBUG("=")
+        PRINTLN_IF_DEBUG(_httpServer->header(i))
+    }
+    String packetid = _httpServer->header("packetid");
     setChanged(true);
-    PRINTLN_VARIABLE_IF_DEBUG(id)
+    PRINTLN_VARIABLE_IF_DEBUG(packetid)
 
-    _httpServer->sendHeader("id", id);
-    _httpServer->send(200, "text/html", "PUBACK");
+    _httpServer->sendHeader("packetid", packetid);
+    _httpServer->sendHeader("packet", "puback");
+    _httpServer->send(204, "text/plain", "");
     delay(10);
 }
 
@@ -136,7 +145,9 @@ void MQTTServer::restServerRouting() {
 void MQTTServer::begin(uint32_t port) {
     _httpServer = new ESP8266WebServer(port);
     restServerRouting();
-    const char* headers[] = {"id"};
+    // headers are not automatically collected
+    // All headers needed must be listed here in the header list to be "collected"
+    const char* headers[] = {"packetid", "dup", "version"};
     _httpServer->collectHeaders(headers, sizeof(headers)/ sizeof(headers[0]));
     _httpServer->begin();
 }

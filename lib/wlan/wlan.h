@@ -89,7 +89,7 @@ public:
     /**
      * Checks if the WLAN connection is established
      */
-    bool isConnected();
+    static bool isConnected();
 
     /**
      * connects to the wlan, if currently not connected
@@ -104,8 +104,10 @@ public:
 
     /**
      * Creates a station used for configuration purpouse
+     * @param ssid ssid of the station 
+     * @param password password to log into the station
      */
-    bool softAP(const String& ssid);
+    bool softAP(const String ssid = "Yaha Station", const String password = "yahaadmin");
 
     /**
      * Disconnects from wlan

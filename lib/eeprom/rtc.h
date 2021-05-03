@@ -105,4 +105,9 @@ private:
      */
     uint16_t _startType;
 
+    /**
+     * Started by RTC wakeup (false) or power on (true)
+     */
+    bool _isPowerOn;
+
 };
