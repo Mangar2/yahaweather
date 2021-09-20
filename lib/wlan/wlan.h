@@ -43,14 +43,19 @@ public:
     };
 
     /**
-     * Sets the battery configuration
+     * Constructor
+     */
+    WLAN() : _hasAP(false) {}
+
+    /**
+     * Sets the configuration
      */
     virtual void setConfig(jsonObject_t& config) { 
         _config.set(config); 
     }
 
     /**
-     * Gets the battery configuraiton
+     * Gets the configuraiton
      */
     virtual jsonObject_t getConfig() { 
         return _config.get();
@@ -103,6 +108,19 @@ public:
     bool connect(const String& softAPssid);
 
     /**
+     * Sets the mode to simultaneous Access Point and station mode
+     */
+    void setAPAndStationMode();
+
+    /**
+     * Configures the soft AP
+     * @param ip ip address of the soft AP
+     * @param gateway gateway ip address
+     * @param subnet subnet mask
+     */
+    void softAPConfig(String ip, String gateway, String subnet);
+
+    /**
      * Creates a station used for configuration purpouse
      * @param ssid ssid of the station 
      * @param password password to log into the station
@@ -110,9 +128,24 @@ public:
     bool softAP(const String ssid = "Yaha Station", const String password = "yahaadmin");
 
     /**
+     * @returns true, if a ap is active at present
+     */
+    bool hasAP() { return _hasAP; }
+
+    /**
+     * Closes the access point
+     */ 
+    bool apDisconnect();
+
+    /**
      * Disconnects from wlan
      */
     void disconnect();
+
+    /**
+     * @returns ip address of the access point
+     */
+    static String getAPIP();
 
     /**
      * Gets the ip address of this device
@@ -133,6 +166,8 @@ private:
      * Tries to connect to wlan, prints error codes on failure
      */
     bool connect();
+
+    bool _hasAP;
 
     Configuration _config;
 

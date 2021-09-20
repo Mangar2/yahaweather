@@ -11,15 +11,14 @@
 
 #include <ESP8266WiFi.h>        // Include the Wi-Fi library
 
-
-
-#define __DEBUG
-#define __BME
+// #define __DEBUG
+#define __SOFT_AP   // Always add a access point additionally to the WLAN connection
+// #define __BME
 // #define __IRRIGATION
 // #define __SWITCH
 // #define __MOTION
-#define __BATTERY
-#define __RTC
+// #define __BATTERY
+// #define __RTC
 // #define __RAIN
 
 #include <vector>
@@ -48,29 +47,33 @@ const uint8_t ACTIVATE_RAIN_PIN = D7;
 #endif
 
 #ifdef __IRRIGATION
-#include <irrigation.h>
+#include "irrigation.h"
 #endif
 
 #ifdef __SWITCH
-#include <switch.h>
+#include "switch.h"
 #endif
 
 #ifdef __MOTION
-#include <motion.h>
+#include "motion.h"
+#endif
+
+#ifdef __SOFT_AP
+#include "softap.h"
 #endif
 
 const uint32_t SERIAL_SPEED = 115200;
-const char* STATION_NAME = "RaisedBed";
+const char* AP_NAME = "YAHA_ESP_AP";
 
 YahaServer server;
-
 
 /**
  * Setup everything
  */
-
 void setup() {
-    INIT_SERIAL_IF_DEBUG(SERIAL_SPEED)
+    Serial.begin(SERIAL_SPEED);
+    delay(10);
+    PRINTLN_IF_DEBUG("Setup started")
     #ifdef __BATTERY
     server.addDevice(new Battery());
     #endif
@@ -92,7 +95,11 @@ void setup() {
     #ifdef __MOTION
     server.addDevice(new Motion());
     #endif
-    server.setup(STATION_NAME);
+    #ifdef __SOFT_AP
+    // AP must be created before connecting to WLAN. This is done by applying priority 1
+    server.addDevice(new SoftAP(), 1);
+    #endif
+    server.setup(AP_NAME);
 }
 
 /**

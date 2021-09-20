@@ -16,6 +16,7 @@
 BrokerProxy YahaServer::brokerProxy;
 WLAN YahaServer::wlan;
 std::vector<IDevice*> YahaServer::_devices;
+std::vector<uint8_t> YahaServer::_priority;
 
 void YahaServer::sendMessageToDevices(const String& key, const String& value) {
     for (auto const& device: _devices) {
@@ -33,14 +34,25 @@ void YahaServer::sendMessageToDevices(const String& key, const String& value) {
     }
 }
 
-void YahaServer::setup(const String stationSSID) {
-    setupEEPROM();
-    MQTTServer::begin();
-    wlan.connect(stationSSID);
-    for (auto const& device: _devices) {
-        MQTTServer::addForm(device->getHtmlPage());
-        device->setup();
+void YahaServer::setupDevices(uint8_t priority) {
+    for (uint8_t i = 0; i < _devices.size(); i++) {
+        auto const& device = _devices[i];
+        if (_priority[i] == priority) {
+            device->setup();
+        }
     }
+}
+
+void YahaServer::setup(const String APSSID) {
+    setupEEPROM();
+    setupDevices(1);
+    MQTTServer::begin();
+    wlan.connect(APSSID);
+    setupDevices(0);
+    for (auto const& device : _devices) {
+        MQTTServer::addForm(device->getHtmlPage());
+    }
+
     PRINTLN_VARIABLE_IF_DEBUG(system_get_free_heap_size())
 }
 
@@ -80,7 +92,8 @@ void YahaServer::loop() {
         device->run();
     }
     bool noWLANAfterPowerOn = _isPowerOn && !wlan.isConnected();
-    if (!noWLANAfterPowerOn && (_isBatteryMode || _sleepTimeInSeconds == 0)) {
+    PRINTLN_VARIABLE_IF_DEBUG(_isBatteryMode)
+    if (!noWLANAfterPowerOn && _isBatteryMode) {
         closeDown();
     } else {
         for (uint16_t i = 0; i < 5000; i++) {

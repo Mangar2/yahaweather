@@ -86,23 +86,49 @@ void WLAN::reconnect() {
 void WLAN::disconnect() {
     WiFi.disconnect();
     delay(50);
-    //WiFi.softAPdisconnect(wifioff)
+}
+
+void WLAN::setAPAndStationMode() {
+    WiFi.mode(WIFI_AP_STA);
+    PRINTLN_IF_DEBUG("WiFi mode set to WIFI_AP_STA")
+}
+
+void WLAN::softAPConfig(String ip, String gateway, String subnet) {
+    IPAddress localIP;
+    IPAddress gatewayIP;
+    IPAddress subnetIP;
+    localIP.fromString(ip);
+    gatewayIP.fromString(gateway);
+    subnetIP.fromString(subnet);
+    PRINTLN_VARIABLE_IF_DEBUG(localIP)
+    PRINTLN_VARIABLE_IF_DEBUG(gatewayIP)
+    PRINTLN_VARIABLE_IF_DEBUG(subnetIP)
+    WiFi.softAPConfig(localIP, gatewayIP, subnetIP);
 }
 
 bool WLAN::softAP(const String ssid, const String password) {
-
-    PRINTLN_IF_DEBUG("Sett up Wifi station in soft ap mode, IP: 192.168.4.1, ssid: " + ssid + " password: " + password)
-    bool success = WiFi.softAP(ssid, password);
-    PRINTLN_VARIABLE_IF_DEBUG(success)
-    return success;
+    Serial.print("Sett up Wifi station in soft ap mode, ssid: " + ssid + " password: " + password);
+    _hasAP = WiFi.softAP(ssid, password);
+    Serial.println(" accesspoint IP: " + WiFi.softAPIP().toString());
+    PRINTLN_VARIABLE_IF_DEBUG(_hasAP)
+    return _hasAP;
 
 }
 
+bool WLAN::apDisconnect() {
+    _hasAP = !WiFi.softAPdisconnect(true);
+    return !_hasAP;
+}
+
+String WLAN::getAPIP() {
+    IPAddress ip = WiFi.softAPIP();
+    return ip.toString();
+}
 
 bool WLAN::connect() {
     uint8_t tries = 0;
     bool isConnectedToWLAN = false;
-    WiFi.forceSleepWake();
+    // WiFi.forceSleepWake();
     delay(1);
     WiFi.persistent(false);
     PRINT_IF_DEBUG("Connect to WLAN, ssid: ")
